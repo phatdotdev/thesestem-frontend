@@ -1,0 +1,37 @@
+@import "tailwindcss";
+@custom-variant dark (&:where([class=dark], [class=dark] *));
+
+@font-face {
+  font-family: "K2D";
+  src: url("../assets/fonts/K2D/") format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Litita";
+  src: url("../assets/fonts/Lilita_One/LilitaOne-Regular.ttf")
+    format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src: url("../assets/fonts/Roboto/Roboto-VariableFont_wdth\,wght.ttf")
+    format("truetype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("../assets/fonts/Inter/Inter-VariableFont_opsz\,wght.ttf")
+    format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}
+
+header {
+  font-family: "Inter", sans-serif;
+}
