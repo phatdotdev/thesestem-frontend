@@ -27,6 +27,13 @@ const StudentManagementPage = () => {
     courseId: "",
   });
 
+  const [tempForm, setTempForm] = useState({
+    name: "",
+    code: "",
+    programId: "",
+    courseId: "",
+  });
+
   const [page, setPage] = useState(0);
 
   const { data: studentResponse, isLoading } = useSearchStudentsQuery({
@@ -45,40 +52,49 @@ const StudentManagementPage = () => {
   const [openExcel, setOpenExcel] = useState(false);
 
   const handleChange = (field: string, value: string) => {
-    setForm((prev) => ({
+    setTempForm((prev) => ({
       ...prev,
       [field]: value,
     }));
   };
 
   const handleSearch = () => {
+    setForm(tempForm);
     setPage(0);
   };
 
   const handleReset = () => {
+    setTempForm({
+      name: "",
+      code: "",
+      programId: "",
+      courseId: "",
+    });
+
     setForm({
       name: "",
       code: "",
       programId: "",
       courseId: "",
     });
+
     setPage(0);
   };
 
   return (
-    <div className="space-y-4 bg-white px-6 py-4 rounded-lg border border-gray-300 shadow">
+    <div className="space-y-4 bg-white dark:bg-gray-900 px-6 py-4 rounded-lg border border-gray-300 dark:border-gray-700 shadow">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
             <User size={26} />
           </div>
 
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Quản lý sinh viên
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Quản lý thông tin sinh viên thuộc tổ chức
             </p>
           </div>
@@ -106,8 +122,8 @@ const StudentManagementPage = () => {
       </div>
 
       {/* Search */}
-      <div className="rounded border border-gray-200 bg-gray-50 p-4 rounded-lg">
-        <div className="flex items-center gap-2 text-gray-800 mb-2">
+      <div className="rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
+        <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200 mb-2">
           <UserSearch size={22} />
           <p className="text-lg font-semibold">Tìm kiếm sinh viên</p>
         </div>
@@ -116,14 +132,14 @@ const StudentManagementPage = () => {
           <Input
             label="Mã sinh viên"
             size="sm"
-            value={form.code}
+            value={tempForm.code}
             onChange={(e) => handleChange("code", e.target.value)}
           />
 
           <Input
             label="Họ tên"
             size="sm"
-            value={form.name}
+            value={tempForm.name}
             onChange={(e) => handleChange("name", e.target.value)}
           />
 
@@ -131,7 +147,7 @@ const StudentManagementPage = () => {
             label="Chương trình"
             options={[{ label: "Chọn chương trình", value: "" }]}
             size="sm"
-            value={form.programId}
+            value={tempForm.programId}
             onChange={(e) => handleChange("programId", e.target.value)}
           />
 
@@ -139,7 +155,7 @@ const StudentManagementPage = () => {
             label="Khóa"
             options={[{ label: "Chọn khóa", value: "" }]}
             size="sm"
-            value={form.courseId}
+            value={tempForm.courseId}
             onChange={(e) => handleChange("courseId", e.target.value)}
           />
         </div>
@@ -150,7 +166,7 @@ const StudentManagementPage = () => {
             label="Xóa lọc"
             size="sm"
             variant="ghost"
-            className="border border-gray-300"
+            className="border border-gray-300 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
             onClick={handleReset}
           />
 
@@ -164,22 +180,22 @@ const StudentManagementPage = () => {
       </div>
 
       {/* Title */}
-      <div className="flex items-center gap-2 text-gray-800 mb-2 px-2">
+      <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200 mb-2 px-2">
         <Users size={20} />
         <p className="text-lg font-semibold">Danh sách sinh viên</p>
       </div>
 
       {/* Table */}
-      <div className="border border-gray-200 bg-white">
+      <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-lg overflow-hidden">
         {/* Header */}
         <div
           className="
           grid grid-cols-9 gap-4
-          border-b border-gray-300
-          bg-gray-50
+          border-b border-gray-300 dark:border-gray-700
+          bg-gray-50 dark:bg-gray-800
           px-4 py-3
           text-xs font-semibold uppercase
-          tracking-wide text-gray-600
+          tracking-wide text-gray-600 dark:text-gray-300
         "
         >
           <div className="col-span-2 text-center">Sinh viên</div>
@@ -194,7 +210,7 @@ const StudentManagementPage = () => {
 
         {/* Rows */}
         {isLoading ? (
-          <div className="h-40 flex items-center justify-center text-gray-500">
+          <div className="h-40 flex items-center justify-center text-gray-500 dark:text-gray-400">
             Đang tải dữ liệu...
           </div>
         ) : students.length > 0 ? (
@@ -251,7 +267,6 @@ const StudentManagementPage = () => {
       )}
 
       {/* Modals */}
-
       <StudentFormModal
         student={student}
         open={openModal}

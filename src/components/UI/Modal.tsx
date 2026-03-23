@@ -18,11 +18,11 @@ const Modal = ({ open, onClose, children, width = "max-w-lg" }: ModalProps) => {
 
       {/* MODAL */}
       <div
-        className={`relative w-full ${width} bg-white rounded-xl shadow-lg p-6 z-10 animate-fade-in`}
+        className={`relative w-full ${width} bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 z-10 animate-fade-in`}
       >
         {/* CLOSE */}
         <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
           onClick={onClose}
         >
           <X size={18} />

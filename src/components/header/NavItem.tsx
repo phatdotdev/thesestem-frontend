@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, matchPath } from "react-router-dom";
 import type { LucideIcon } from "lucide-react";
 import type { IconType } from "react-icons";
 import clsx from "clsx";
@@ -9,6 +9,7 @@ interface NavItemProps {
   icon: LucideIcon | IconType;
   size?: "sm" | "md";
   borderPosition?: "left" | "right" | "top" | "bottom";
+  exact?: boolean; // 👈 thêm để control match
 }
 
 const sizeConfig = {
@@ -30,12 +31,12 @@ const NavItem = ({
   icon: Icon,
   size = "md",
   borderPosition = "left",
+  exact = false,
 }: NavItemProps) => {
   const location = useLocation();
-  const isActive =
-    to === "/" ? location.pathname === "/" : location.pathname.startsWith(to);
-
   const cfg = sizeConfig[size];
+
+  const isActive = !!matchPath({ path: to, end: exact }, location.pathname);
 
   const indicatorPosition = {
     left: "left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r",
@@ -69,7 +70,7 @@ const NavItem = ({
       {/* Active Indicator */}
       <span
         className={clsx(
-          "absolute bg-blue-500 transition-all duration-200 rounded-lg",
+          "absolute bg-blue-500 transition-all duration-200",
           indicatorPosition[borderPosition],
           isActive ? "opacity-100" : "opacity-0 group-hover:opacity-40",
           borderPosition === "bottom" ? "w-[75%]" : "",

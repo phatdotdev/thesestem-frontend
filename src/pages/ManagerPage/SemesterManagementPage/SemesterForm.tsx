@@ -19,7 +19,6 @@ type SemesterFormProps = {
   open: boolean;
   initialData?: SemesterProps;
   onClose: () => void;
-  onSuccess: () => void;
 };
 
 const SemesterForm = ({
@@ -28,7 +27,6 @@ const SemesterForm = ({
   open,
   initialData,
   onClose,
-  onSuccess,
 }: SemesterFormProps) => {
   const [addSemester] = useAddSemeseterMutation();
   const [updateSemester] = useUpdateSemesterMutation();
@@ -50,11 +48,9 @@ const SemesterForm = ({
         id: semesterId,
         data: { name, startDate, endDate },
       }).unwrap();
-      // console.log("id: " + semesterId);
     } else {
       await addSemester({ id: yearId, data: { name, startDate, endDate } });
     }
-    onSuccess();
   };
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">

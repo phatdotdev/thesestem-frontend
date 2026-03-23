@@ -38,4 +38,5 @@ export type LecturerResponse = {
   address: string;
   faculty: { id: string; name: string };
   department: { id: string; name: string };
+  avatarUrl?: string;
 };

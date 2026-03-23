@@ -59,9 +59,7 @@ const TopicCard = ({
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Users className="h-4 w-4" />
-            <span>
-              {topic.students.length}/{topic.maxStudents} sinh viên
-            </span>
+            <span>{topic.maxStudents} sinh viên</span>
           </div>
         </div>
 

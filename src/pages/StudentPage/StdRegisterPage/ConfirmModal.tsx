@@ -58,18 +58,18 @@ const ConfirmModal = ({
     <Modal open={open} onClose={onClose}>
       <div className="space-y-4">
         {/* Header */}
-        <h2 className="text-lg font-semibold text-gray-800">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
           Xác nhận thao tác
         </h2>
 
         {/* Content */}
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-gray-600 dark:text-gray-300">
           Bạn có chắc muốn <b>{getActionText()}</b> đăng ký với giảng viên{" "}
           <b>{register.mentor.fullName}</b> không?
         </p>
 
         {error && (
-          <div className="text-sm text-red-500 bg-red-50 p-2 rounded">
+          <div className="text-sm text-red-500 dark:text-red-300 bg-red-50 dark:bg-red-950/40 p-2 rounded">
             {error}
           </div>
         )}

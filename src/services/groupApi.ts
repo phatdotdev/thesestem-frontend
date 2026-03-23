@@ -1,17 +1,20 @@
 import type {
   AssignmentResponse,
+  AssignStudentRequest,
   CreateAssignmentRequest,
   CreateGroupForm,
   CreateTopicRequest,
   DeleteAssignmentRequest,
   DeleteTopicRequest,
   GroupResponse,
+  ThesesResponse,
   TopicResponse,
   UpdateAssignmentRequest,
   UpdateGroupForm,
   UpdateTopicRequest,
 } from "../types/group";
 import type { ApiResponse } from "../types/response";
+import type { StudentResponse } from "../types/student";
 import { api } from "./api";
 
 const GROUP_URL = "/groups";
@@ -23,6 +26,19 @@ export const groupApi = api.injectEndpoints({
         url: `${GROUP_URL}/mentor/current`,
       }),
       providesTags: ["Group"],
+    }),
+    getMentorGroupsBySemester: builder.query<ApiResponse<GroupResponse[]>, any>(
+      {
+        query: (id) => ({
+          url: `${GROUP_URL}/mentor/semester/${id}`,
+        }),
+        providesTags: ["Group"],
+      },
+    ),
+    getCurrentStudentGroups: builder.query<ApiResponse<GroupResponse[]>, void>({
+      query: () => ({
+        url: `${GROUP_URL}/student/current`,
+      }),
     }),
     getGroupById: builder.query<ApiResponse<GroupResponse>, string>({
       query: (id) => ({
@@ -123,11 +139,57 @@ export const groupApi = api.injectEndpoints({
         method: "DELETE",
       }),
     }),
+    assignStudentToTopic: builder.mutation<
+      ApiResponse<void>,
+      AssignStudentRequest
+    >({
+      query: ({ groupId, studentId, topicId }) => ({
+        url: `${GROUP_URL}/${groupId}/topics/${topicId}/${studentId}`,
+        method: "POST",
+      }),
+    }),
+    /* STUDENTS */
+    getStudentsInGroup: builder.query<ApiResponse<StudentResponse[]>, string>({
+      query: (id) => ({
+        url: `${GROUP_URL}/${id}/students`,
+      }),
+      providesTags: ["GroupStudent"],
+    }),
+    assignStudentToGroup: builder.mutation<
+      ApiResponse<void>,
+      { groupId: string; studentId: string }
+    >({
+      query: ({ groupId, studentId }) => ({
+        url: `${GROUP_URL}/${groupId}/students/${studentId}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Group", "SemesterStudent"],
+    }),
+    removeStudentFromGroup: builder.mutation<
+      ApiResponse<void>,
+      { groupId: string; studentId: string }
+    >({
+      query: ({ groupId, studentId }) => ({
+        url: `${GROUP_URL}/${groupId}/students/${studentId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Group", "SemesterStudent"],
+    }),
+    /* THESES */
+    getGroupTheses: builder.query<ApiResponse<ThesesResponse[]>, string>({
+      query: (id) => ({
+        url: `${GROUP_URL}/${id}/theses`,
+      }),
+    }),
   }),
 });
 
 export const {
+  /* GROUPS */
+  useGetCurrentStudentGroupsQuery,
   useGetCurrentMentorGroupsQuery,
+  useLazyGetCurrentMentorGroupsQuery,
+  useLazyGetMentorGroupsBySemesterQuery,
   useGetGroupByIdQuery,
   useCreateGroupMutation,
   useUpdateGroupMutation,
@@ -142,4 +204,11 @@ export const {
   useCreateTopicMutation,
   useUpdateTopicMutation,
   useDeleteTopicMutation,
+  useAssignStudentToTopicMutation,
+  /* STUDENTS */
+  useGetStudentsInGroupQuery,
+  useAssignStudentToGroupMutation,
+  useRemoveStudentFromGroupMutation,
+  /* THESES */
+  useGetGroupThesesQuery,
 } = groupApi;

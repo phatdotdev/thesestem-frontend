@@ -61,16 +61,22 @@ const LecturerManagementPage = () => {
   const { data: collegesResponse } = useGetCollegesQuery();
   const { data: facultiesResponse } = useGetFacultiesQuery();
   const { data: departmentsResponse } = useGetDeparmentsQuery();
+
   const colleges = (collegesResponse?.data || []).map((college: any) => ({
     value: college.id,
     label: college.name,
   }));
+
   const faculties = (facultiesResponse?.data || []).map((faculty: any) => ({
     value: faculty.id,
     label: faculty.name,
   }));
+
   const departments = (departmentsResponse?.data || []).map(
-    (department: any) => ({ value: department.id, label: department.name }),
+    (department: any) => ({
+      value: department.id,
+      label: department.name,
+    }),
   );
 
   const handleReset = () => {
@@ -86,19 +92,19 @@ const LecturerManagementPage = () => {
   };
 
   return (
-    <div className="space-y-4 bg-white px-6 py-4 rounded-lg border border-gray-300 shadow">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="space-y-4 bg-white dark:bg-gray-900 px-6 py-4 rounded-lg border border-gray-300 dark:border-gray-700 shadow">
+      {/* HEADER */}
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
             <User size={26} />
           </div>
 
           <div>
-            <h1 className="text-xl font-semibold text-gray-900">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Quản lý giảng viên
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Quản lý thông tin cán bộ thuộc tổ chức
             </p>
           </div>
@@ -124,14 +130,14 @@ const LecturerManagementPage = () => {
         </div>
       </div>
 
-      {/* Search */}
-      <div className="rounded border border-gray-200 bg-gray-50 p-4 rounded-lg">
-        <div className="flex items-center gap-2 text-gray-800 mb-2">
-          <UserSearch size={22} />
+      {/* SEARCH */}
+      <div className="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+        <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200 mb-3">
+          <UserSearch size={20} />
           <p className="text-lg font-semibold">Tìm kiếm giảng viên</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-4 gap-y-2 lg:grid-cols-3 mb-2">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Input
             label="Mã giảng viên"
             size="sm"
@@ -155,9 +161,9 @@ const LecturerManagementPage = () => {
 
           <Select
             label="Trường"
-            options={[{ label: "Chọn trường", value: "", ...colleges }]}
+            options={[{ label: "Chọn trường", value: "" }, ...colleges]}
             size="sm"
-            value={form.collegeId || ""}
+            value={form.collegeId}
             onChange={(e) => handleChange("collegeId", e.target.value)}
           />
 
@@ -165,26 +171,26 @@ const LecturerManagementPage = () => {
             label="Khoa"
             options={[{ label: "Chọn khoa", value: "" }, ...faculties]}
             size="sm"
-            value={form.facultyId || ""}
+            value={form.facultyId}
             onChange={(e) => handleChange("facultyId", e.target.value)}
           />
 
           <Select
             label="Bộ môn"
-            options={[{ label: "Chọn bộ môn", value: "", ...departments }]}
+            options={[{ label: "Chọn bộ môn", value: "" }, ...departments]}
             size="sm"
-            value={form.departmentId || ""}
-            onChange={(e) => handleChange("department", e.target.value)}
+            value={form.departmentId}
+            onChange={(e) => handleChange("departmentId", e.target.value)}
           />
         </div>
 
-        <div className="flex justify-end gap-3 pt-2">
+        <div className="flex justify-end gap-3 mt-4">
           <Button
             icon={GrPowerReset}
             label="Xóa lọc"
             size="sm"
             variant="ghost"
-            className="border border-gray-300"
+            className="border border-gray-300 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
             onClick={handleReset}
           />
 
@@ -197,16 +203,16 @@ const LecturerManagementPage = () => {
         </div>
       </div>
 
-      {/* Title */}
-      <div className="flex items-center gap-2 text-gray-800 mb-2 px-2">
+      {/* TITLE */}
+      <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200 px-2">
         <Users size={20} />
         <p className="text-lg font-semibold">Danh sách giảng viên</p>
       </div>
 
-      {/* Table */}
-      <div className="border border-gray-200 bg-white dark:border-gray-800 dark:bg-gray-900">
-        {/* Header */}
-        <div className="grid grid-cols-9 gap-4 border-b border-gray-300 bg-gray-50 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600">
+      {/* TABLE */}
+      <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-lg overflow-hidden">
+        {/* HEADER */}
+        <div className="grid grid-cols-9 gap-4 border-b border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-xs font-semibold uppercase tracking-wide text-gray-600 dark:text-gray-300">
           <div className="col-span-2 text-center">Cán bộ</div>
           <div className="text-center">Mã CB</div>
           <div className="col-span-2 text-center">Đơn vị</div>
@@ -216,9 +222,9 @@ const LecturerManagementPage = () => {
           <div className="text-center">Hành động</div>
         </div>
 
-        {/* Rows */}
+        {/* ROWS */}
         {isLoading ? (
-          <div className="h-40 flex items-center justify-center text-gray-500">
+          <div className="h-40 flex items-center justify-center text-gray-500 dark:text-gray-400">
             Đang tải dữ liệu...
           </div>
         ) : lecturers.length > 0 ? (
@@ -243,7 +249,7 @@ const LecturerManagementPage = () => {
         )}
       </div>
 
-      {/* Pagination */}
+      {/* PAGINATION */}
       {totalPages > 1 && (
         <div className="flex justify-center items-center gap-2 pt-2">
           <Button
@@ -274,7 +280,7 @@ const LecturerManagementPage = () => {
         </div>
       )}
 
-      {/* Modals */}
+      {/* MODALS */}
       <LecturerFormModal
         lecturer={lecturer}
         open={openModal}

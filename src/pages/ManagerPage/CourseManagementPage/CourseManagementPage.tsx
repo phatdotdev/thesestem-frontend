@@ -35,17 +35,19 @@ const CourseManagementPage = () => {
   };
 
   return (
-    <div className="space-y-6 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <div className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300">
             <BookOpen />
           </div>
 
           <div>
-            <h1 className="text-xl font-semibold">Quản lý khóa học</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl font-semibold dark:text-gray-100">
+              Quản lý khóa học
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Quản lý danh sách khóa học trong tổ chức
             </p>
           </div>
@@ -62,13 +64,15 @@ const CourseManagementPage = () => {
         />
       </div>
 
-      <p className="text-lg font-semibold">Danh sách khóa học</p>
+      <p className="text-lg font-semibold dark:text-gray-100">
+        Danh sách khóa học
+      </p>
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded shadow-sm overflow-hidden">
         {courses.length > 0 ? (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 border-b border-gray-300">
+            <thead className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left font-medium">Mã</th>
                 <th className="px-6 py-3 text-left font-medium">
@@ -83,16 +87,21 @@ const CourseManagementPage = () => {
 
             <tbody>
               {courses.map((c: any) => (
-                <tr key={c.id} className="hover:bg-gray-50 transition">
-                  <td className="px-6 py-4 font-medium">{c.code}</td>
+                <tr
+                  key={c.id}
+                  className="hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                >
+                  <td className="px-6 py-4 font-medium dark:text-gray-100">
+                    {c.code}
+                  </td>
 
-                  <td className="px-6 py-4">{c.name}</td>
+                  <td className="px-6 py-4 dark:text-gray-200">{c.name}</td>
 
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 dark:text-gray-200">
                     {c.startYear} - {c.endYear}
                   </td>
 
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 dark:text-gray-200">
                     {formatDate(c.startDate)} → {formatDate(c.endDate)}
                   </td>
 
@@ -100,8 +109,8 @@ const CourseManagementPage = () => {
                     <span
                       className={`px-2 py-1 rounded text-xs font-medium ${
                         c.active
-                          ? "bg-green-100 text-green-700"
-                          : "bg-gray-100 text-gray-500"
+                          ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-300"
+                          : "bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400"
                       }`}
                     >
                       {c.active ? "Hoạt động" : "Ngừng"}

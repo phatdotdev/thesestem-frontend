@@ -89,7 +89,7 @@ const ImageUploader = ({
               type="button"
               onClick={handleRemove}
               className="absolute right-2 top-2 rounded-full bg-black/60 p-1
-                         text-white hover:bg-red-500 transition"
+                         text-white hover:bg-red-500 dark:hover:bg-red-600 transition"
             >
               <X size={14} />
             </button>
@@ -99,7 +99,7 @@ const ImageUploader = ({
               className="absolute inset-0 flex items-center justify-center bg-black/40
                          opacity-0 transition group-hover:opacity-100"
             >
-              <span className="rounded-md bg-white/90 px-3 py-1 text-sm font-medium text-gray-800">
+              <span className="rounded-md bg-white/90 px-3 py-1 text-sm font-medium text-gray-800 dark:bg-gray-900/90 dark:text-gray-100">
                 Đổi ảnh
               </span>
             </div>
@@ -107,8 +107,8 @@ const ImageUploader = ({
         ) : (
           <div
             className={clsx(
-              "flex h-full w-full flex-col items-center justify-center gap-2 text-gray-500",
-              disabled ? "bg-gray-100" : "",
+              "flex h-full w-full flex-col items-center justify-center gap-2 text-gray-500 dark:text-gray-400",
+              disabled ? "bg-gray-100 dark:bg-gray-800" : "",
             )}
           >
             <ImagePlus size={24} />

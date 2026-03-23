@@ -8,6 +8,7 @@ interface RegisterCardProps {
   onAccept?: (register: RegisterResposne) => void;
   onReject?: (register: RegisterResposne) => void;
   onAdd?: (register: RegisterResposne) => void;
+  added?: boolean;
 }
 
 const RegisterCard = ({
@@ -15,6 +16,7 @@ const RegisterCard = ({
   onAccept,
   onReject,
   onAdd,
+  added,
 }: RegisterCardProps) => {
   const { student, message, status } = register;
 
@@ -112,13 +114,16 @@ const RegisterCard = ({
         {status === "CANCELLED" && (
           <Badge label="Đã hủy yêu cầu" variant="danger" />
         )}
-        {status === "ACCEPTED" && (
-          <Button
-            label="Thêm vào nhóm"
-            size="sm"
-            onClick={() => onAdd?.(register)}
-          />
-        )}
+        {status === "ACCEPTED" &&
+          (added ? (
+            <Badge label="Đã thêm vào nhóm" variant="success" />
+          ) : (
+            <Button
+              label="Thêm vào nhóm"
+              size="sm"
+              onClick={() => onAdd?.(register)}
+            />
+          ))}
       </div>
     </div>
   );

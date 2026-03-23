@@ -27,10 +27,13 @@ const MentorRow = ({
     mentor.faculty?.name ||
     mentor.college?.name ||
     "Chưa cập nhật";
+
   return (
     <div
       className="
-      group bg-white border border-gray-200
+      group 
+      bg-white dark:bg-gray-900
+      border border-gray-200 dark:border-gray-700
       rounded-3xl p-6
       shadow-sm hover:shadow-xl
       hover:-translate-y-1
@@ -43,30 +46,39 @@ const MentorRow = ({
           className="
           h-10 w-10 rounded-full
           bg-gradient-to-br from-blue-100 to-indigo-100
+          dark:from-blue-900/30 dark:to-indigo-900/30
           flex items-center justify-center
-          text-blue-600 font-semibold
+          text-blue-600 dark:text-blue-400
+          font-semibold
         "
         >
-          {mentor.fullName?.charAt(0) || <User size={20} />}
+          {mentor.fullName?.charAt(0) || (
+            <User size={20} className="text-blue-500 dark:text-blue-400" />
+          )}
         </div>
 
         <div>
-          <h3 className="font-semibold text-gray-800 group-hover:text-blue-600 transition">
+          <h3 className="font-semibold text-gray-800 dark:text-gray-100 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition">
             {mentor.fullName}
           </h3>
 
-          <p className="text-sm text-gray-500">{mentor.email}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            {mentor.email}
+          </p>
         </div>
       </div>
 
       {/* Divider */}
-      <div className="my-5 border-t border-gray-100" />
+      <div className="my-5 border-t border-gray-100 dark:border-gray-700" />
 
       {/* Info */}
-      <div className="space-y-1 text-sm text-gray-600">
+      <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
         <p>Mã giảng viên: {mentor.lecturerCode}</p>
+
         {mentor.phone && (
-          <p className="font-semibold text-blue-500">Đơn vị quản lý: {unit}</p>
+          <p className="font-semibold text-blue-500 dark:text-blue-400">
+            Đơn vị quản lý: {unit}
+          </p>
         )}
       </div>
 

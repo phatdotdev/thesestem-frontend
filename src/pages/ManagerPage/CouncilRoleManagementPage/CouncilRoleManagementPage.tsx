@@ -45,17 +45,20 @@ const CouncilRoleManagementPage = () => {
 
   /* ================= UI ================= */
   return (
-    <div className="space-y-6 bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+    <div className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
             <ShieldCheck />
           </div>
 
           <div>
-            <h1 className="text-xl font-semibold">Quản lý vai trò hội đồng</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Quản lý vai trò hội đồng
+            </h1>
+
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Thêm, chỉnh sửa và quản lý vai trò trong hội đồng
             </p>
           </div>
@@ -68,12 +71,17 @@ const CouncilRoleManagementPage = () => {
           onClick={handleAdd}
         />
       </div>
-      <p className="text-lg font-semibold">Danh sách vai trò</p>
+
+      {/* Title */}
+      <p className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+        Danh sách vai trò
+      </p>
+
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
         {roles.length > 0 ? (
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-gray-600 border-b border-gray-300">
+            <thead className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700">
               <tr>
                 <th className="px-6 py-3 text-left font-medium">Mã</th>
                 <th className="px-6 py-3 text-left font-medium">Tên vai trò</th>
@@ -86,13 +94,17 @@ const CouncilRoleManagementPage = () => {
               {roles.map((role) => (
                 <tr
                   key={role.id}
-                  className="shadow-sm hover:bg-gray-50 transition"
+                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
                 >
-                  <td className="px-6 py-4 font-medium">{role.code}</td>
+                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
+                    {role.code}
+                  </td>
 
-                  <td className="px-6 py-4">{role.name}</td>
+                  <td className="px-6 py-4 text-gray-800 dark:text-gray-200">
+                    {role.name}
+                  </td>
 
-                  <td className="px-6 py-4 text-gray-500">
+                  <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
                     {role.description || "-"}
                   </td>
 

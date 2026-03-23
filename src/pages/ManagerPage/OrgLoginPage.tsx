@@ -11,12 +11,15 @@ const OrgLoginPage = () => {
   const { "org-code": orgCode } = useParams();
   const { data } = useSearchOrgInfoByCodeQuery(orgCode as string);
   const [loginOrg] = useLoginOrgMutation();
+
   const orgInfo = data?.data;
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
   const navigation = useNavigate();
   const dispatch = useAppDispatch();
+
   const handleLogin = async () => {
     const data = (
       await loginOrg({
@@ -24,12 +27,15 @@ const OrgLoginPage = () => {
         credentials: { username, password },
       }).unwrap()
     ).data;
+
     dispatch(loginSuccess({ token: data?.accessToken }));
+
     if (data.role === "LECTURER") navigation(`/${orgCode}/l`);
     if (data.role === "STUDENT") navigation(`/${orgCode}/s`);
   };
+
   return (
-    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2">
+    <div className="min-h-screen grid grid-cols-1 lg:grid-cols-2 bg-gray-50 dark:bg-gray-950">
       {/* LEFT – HERO */}
       <div
         className="relative hidden lg:flex items-center justify-center"
@@ -40,17 +46,18 @@ const OrgLoginPage = () => {
         }}
       >
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/30 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 to-black/30 dark:from-black/80 dark:to-black/60 backdrop-blur-sm" />
 
         {/* Content */}
         <div className="relative z-10 max-w-3xl text-center text-white px-8">
           <img
             src={orgInfo?.logoUrl}
             alt="Logo"
-            className="mx-auto mb-6 h-24 w-24 rounded-full bg-white/90 p-2"
+            className="mx-auto mb-6 h-24 w-24 rounded-full bg-white/90 dark:bg-gray-200/90 p-2"
           />
 
           <h1 className="text-3xl font-bold">Thesis Management System</h1>
+
           <p className="mt-2 text-lg font-medium">{orgInfo?.name}</p>
 
           <p className="mt-4 text-sm opacity-90 leading-relaxed">
@@ -65,8 +72,17 @@ const OrgLoginPage = () => {
       </div>
 
       {/* RIGHT – FORM */}
-      <div className="flex items-center justify-center px-4">
-        <form className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-8 shadow-sm dark:border-gray-800 dark:bg-gray-900">
+      <div className="flex items-center justify-center px-4 py-10">
+        <form
+          className="
+            w-full max-w-md
+            rounded-2xl
+            border border-gray-200 dark:border-gray-800
+            bg-white dark:bg-gray-900
+            p-8
+            shadow-sm dark:shadow-lg
+          "
+        >
           {/* Header */}
           <div className="mb-8 text-center">
             <img
@@ -110,12 +126,15 @@ const OrgLoginPage = () => {
           {/* Button */}
           <button
             type="button"
-            className="
-              w-full rounded-lg bg-blue-600 px-4 py-2.5
-              text-white font-medium
-              hover:bg-blue-700 transition
-            "
             onClick={handleLogin}
+            className="
+              w-full rounded-lg
+              bg-blue-600 dark:bg-blue-500
+              px-4 py-2.5
+              text-white font-medium
+              hover:bg-blue-700 dark:hover:bg-blue-600
+              transition
+            "
           >
             Đăng nhập
           </button>
@@ -132,8 +151,12 @@ const OrgLoginPage = () => {
             type="button"
             disabled
             className="
-              w-full rounded-lg border border-gray-300 px-4 py-2.5
-              text-sm font-medium text-gray-500
+              w-full rounded-lg
+              border border-gray-300 dark:border-gray-700
+              px-4 py-2.5
+              text-sm font-medium
+              text-gray-500 dark:text-gray-400
+              dark:bg-gray-800
               cursor-not-allowed
             "
           >

@@ -111,19 +111,62 @@ export const baseQueryWithReauth: BaseQueryFn<
 export const api = createApi({
   reducerPath: "api",
   baseQuery: baseQueryWithReauth,
+
   tagTypes: [
+    /* AUTH */
     "Auth",
+
+    /* USER */
     "User",
-    "Thesis",
-    "Year",
-    "Structure",
-    "Program",
     "Student",
     "Lecturer",
     "Manager",
-    "Group",
+
+    /* ORGANIZATION */
+    "Organization",
+    "Year",
+    "Program",
+    "Structure",
+
+    /* SEMESTER */
+    "Semester",
     "SemesterStudent",
     "SemesterMentor",
+    "Register",
+
+    /* GROUP */
+    "Group",
+    "GroupStudent",
+    "Assignment",
+    "Topic",
+
+    /* THESIS */
+    "Thesis",
+    "ThesisDraft",
+    "ThesisSubmission",
+    "ThesisFolder",
+    "ThesisFile",
+
+    /* COUNCIL */
+    "Council",
+    "CouncilMember",
+    "CouncilAssignment",
+
+    /* DEFENSE */
+    "Defense",
+    "DefenseScore",
+    "DefenseSchedule",
+
+    /* FILE SYSTEM */
+    "Folder",
+    "FileAsset",
+
+    /* NOTIFICATION (nếu có) */
+    "Notification",
+
+    /* MEETING (nếu có) */
+    "Meeting",
   ],
+
   endpoints: () => ({}),
 });

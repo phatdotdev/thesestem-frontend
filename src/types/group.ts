@@ -1,8 +1,11 @@
+import type { LecturerResponse } from "./lecturer";
 import type { StudentResponse } from "./student";
 
 export type GroupResponse = {
   id: string;
   name: string;
+  students: StudentResponse[];
+  mentor: LecturerResponse | null;
   description: string;
 };
 
@@ -49,7 +52,17 @@ export type TopicResponse = {
   description: string;
   maxStudents: number;
   status: TopicStatus;
-  students: StudentResponse[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type ThesesResponse = {
+  id: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  descriptionEn: string;
+  student: StudentResponse;
   createdAt: string;
   updatedAt: string;
 };
@@ -67,5 +80,11 @@ export type UpdateTopicRequest = {
 
 export type DeleteTopicRequest = {
   groupId: string;
+  topicId: string;
+};
+
+export type AssignStudentRequest = {
+  groupId: string;
+  studentId: string;
   topicId: string;
 };

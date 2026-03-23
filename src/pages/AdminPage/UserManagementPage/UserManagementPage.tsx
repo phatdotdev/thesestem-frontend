@@ -38,19 +38,19 @@ const UserManagementPage = () => {
     setPage(0);
   };
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 space-y-6">
+    <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 space-y-6">
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="bg-blue-100 text-blue-600 rounded-xl p-3 flex items-center justify-center">
+          <div className="bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 rounded-xl p-3 flex items-center justify-center">
             <UserRoundCog size={28} />
           </div>
 
           <div>
-            <h1 className="text-xl font-semibold text-gray-800">
+            <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
               Quản lý người dùng
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Quản lý tài khoản người dùng trong hệ thống
             </p>
           </div>
@@ -70,9 +70,11 @@ const UserManagementPage = () => {
       </div>
 
       {/* FILTER */}
-      <div className="bg-gray-50 border border-gray-200 rounded-xl p-5 space-y-5">
+      <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-5">
         <div className="flex items-center justify-between">
-          <h2 className="font-medium text-gray-700">Tìm kiếm người dùng</h2>
+          <h2 className="font-medium text-gray-700 dark:text-gray-200">
+            Tìm kiếm người dùng
+          </h2>
         </div>
 
         {/* FORM */}
@@ -111,9 +113,11 @@ const UserManagementPage = () => {
       </div>
 
       {/* TABLE */}
-      <div className="border border-gray-200 rounded-xl p-5 space-y-4">
+      <div className="border border-gray-200 dark:border-gray-700 rounded-xl p-5 space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-medium text-gray-700">Danh sách người dùng</h2>
+          <h2 className="font-medium text-gray-700 dark:text-gray-200">
+            Danh sách người dùng
+          </h2>
         </div>
         {managers ? (
           managers.map((manager: ManagerResponse) => (
@@ -129,7 +133,7 @@ const UserManagementPage = () => {
             />
           ))
         ) : (
-          <div className="text-sm text-gray-500 italic">
+          <div className="text-sm text-gray-500 dark:text-gray-400 italic">
             Chưa có dữ liệu người dùng
           </div>
         )}

@@ -9,7 +9,7 @@ import LoginPage from "../pages/PublicPage/LoginPage";
 import RegisterPage from "../pages/PublicPage/RegisterPage";
 import DashBoardPage from "../pages/ManagerPage/DashBoardPage";
 import OrgInfoPage from "../pages/ManagerPage/OrgInfoPage";
-import StdDashboardPage from "../pages/ManagerPage/StdDashboardPage";
+import StdDashboardPage from "../pages/StudentPage/StdDashboardPage";
 import StdRegisterPage from "../pages/StudentPage/StdRegisterPage/StdRegisterPage";
 import PublicLayout from "../components/layouts/PublicLayout";
 import OrgAdminLayout from "../components/layouts/OrgAdminLayout";
@@ -47,6 +47,18 @@ import AdminLayout from "../components/layouts/AdminLayout";
 import UserManagementPage from "../pages/AdminPage/UserManagementPage/UserManagementPage";
 import StatisticsManagementPage from "../pages/AdminPage/StatisticsManagementPage/StatisticsManagementPage";
 import CouncilManagementPage from "../pages/ManagerPage/CouncilManagementPage/CouncilManagementPage";
+import StdGroupPage from "../pages/StudentPage/StudentGroupPage/StdGroupPage";
+import NotFoundPage from "../pages/PublicPage/NotFoundPage";
+import StudentThesesPage from "../pages/StudentPage/StudentThesesPage/StudentThesesPage";
+import StudentThesisDetailsPage from "../pages/StudentPage/StudentThesesPage/StudentThesisDetailsPage";
+import StudentThesisLayout from "../components/layouts/StudentThesisLayout";
+import ThesisDraftPage from "../pages/StudentPage/StudentThesesPage/ThesisDraftPage";
+import ThesisOverviewPage from "../pages/StudentPage/StudentThesesPage/ThesisOverviewPage/ThesisOverviewPage";
+import DefensePage from "../pages/ManagerPage/DefensePage/DefensePage";
+import LecCouncilPage from "../pages/LecturerPage/LecCouncilPage/LecCouncilPage";
+import CouncilDetailsPage from "../pages/LecturerPage/LecCouncilPage/CouncilDetailsPage";
+import CouncilDefensePage from "../pages/LecturerPage/LecCouncilPage/DefensePage/CouncilDefensePage";
+import ThesisResultPage from "../pages/StudentPage/StudentThesesPage/ThesisResultPage/ThesisResultPage";
 
 const AppRoutes = () => {
   const theme = useAppSelector((state) => state.settings.theme);
@@ -90,6 +102,7 @@ const AppRoutes = () => {
           <Route path="timeline" element={<TimelineManager />} />
           <Route path="semester-students" element={<SemesterStudentPage />} />
           <Route path="semester-mentors" element={<SemestorMentorPage />} />
+          <Route path="semester-defenses" element={<DefensePage />} />
           <Route
             path="semester-committees"
             element={<CouncilManagementPage />}
@@ -100,11 +113,22 @@ const AppRoutes = () => {
           <Route index element={<StdDashboardPage />} />
           <Route path="profile" element={<StdProfilePage />} />
           <Route path="register" element={<StdRegisterPage />} />
-          <Route path="group" element={<StdGroupLayout />}>
-            <Route index />
-            <Route path="assignments" element={<AssignmentsPage />} />
-            <Route path="meetings" element={<MeetingsPage />} />
-            <Route path="chat" element={<ChatGroupPage />} />
+          <Route path="group">
+            <Route index element={<StdGroupPage />} />
+            <Route path=":group-id" element={<StdGroupLayout />}>
+              <Route index />
+              <Route path="assignments" element={<AssignmentsPage />} />
+              <Route path="meetings" element={<MeetingsPage />} />
+              <Route path="chat" element={<ChatGroupPage />} />
+            </Route>
+          </Route>
+          <Route path="theses">
+            <Route index element={<StudentThesesPage />} />
+            <Route path=":thesis-id" element={<StudentThesisLayout />}>
+              <Route index element={<ThesisOverviewPage />} />
+              <Route path="draft" element={<ThesisDraftPage />} />
+              <Route path="result" element={<ThesisResultPage />} />
+            </Route>
           </Route>
         </Route>
         {/* LECTURER */}
@@ -122,8 +146,19 @@ const AppRoutes = () => {
               <Route path="chat" element={<ChatPage />} />
             </Route>
           </Route>
+          <Route path="councils">
+            <Route index element={<LecCouncilPage />} />
+            <Route path=":council-id">
+              <Route index element={<CouncilDetailsPage />} />
+              <Route
+                path="defenses/:defense-id"
+                element={<CouncilDefensePage />}
+              />
+            </Route>
+          </Route>
         </Route>
       </Route>
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 };

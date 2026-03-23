@@ -27,19 +27,21 @@ const SemesterStudentPage = () => {
 
   return (
     <div
-      className="space-y-6 bg-white rounded-xl shadow p-6"
+      className="space-y-6 bg-white dark:bg-gray-900 rounded-xl shadow p-6"
       style={{ fontFamily: "Inter" }}
     >
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex items-center justify-center p-4 bg-blue-100 text-blue-500 rounded-lg">
+          <div className="flex items-center justify-center p-4 bg-blue-100 dark:bg-blue-950/40 text-blue-500 dark:text-blue-300 rounded-lg">
             <GraduationCap />
           </div>
 
           <div>
-            <h1 className="text-2xl font-semibold">Quản lý sinh viên</h1>
-            <p className="text-sm text-gray-500">
+            <h1 className="text-2xl font-semibold dark:text-gray-100">
+              Quản lý sinh viên
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Quản lý sinh viên tham gia thực hiện luận văn
             </p>
           </div>
@@ -54,16 +56,16 @@ const SemesterStudentPage = () => {
       </div>
 
       {/* TABLE */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         {/* TABLE HEADER */}
         <div
           className="
           grid grid-cols-9 gap-4
-          border-b border-gray-200
-          bg-gray-50
+          border-b border-gray-200 dark:border-gray-700
+          bg-gray-50 dark:bg-gray-800
           px-4 py-3
           text-xs font-semibold uppercase tracking-wide
-          text-gray-600
+          text-gray-600 dark:text-gray-300
         "
         >
           <div className="col-span-2">Sinh viên</div>
@@ -78,11 +80,11 @@ const SemesterStudentPage = () => {
 
         {/* TABLE BODY */}
         {isLoading ? (
-          <div className="p-6 text-center text-gray-500">
+          <div className="p-6 text-center text-gray-500 dark:text-gray-400">
             Đang tải dữ liệu...
           </div>
         ) : students.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
+          <div className="p-6 text-center text-gray-500 dark:text-gray-400">
             Chưa có sinh viên nào
           </div>
         ) : (

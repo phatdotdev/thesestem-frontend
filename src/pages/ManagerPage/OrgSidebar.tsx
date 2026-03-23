@@ -10,6 +10,7 @@ import {
   MdSettings,
   MdLayers,
   MdOutlineRateReview,
+  MdCoPresent,
 } from "react-icons/md";
 import {
   FaUniversity,
@@ -22,6 +23,7 @@ import {
 import { useParams } from "react-router-dom";
 import NavItem from "../../components/header/NavItem";
 import { useAppSelector } from "../../app/hook";
+import { HiPresentationChartBar } from "react-icons/hi";
 
 const Section = ({ title, children }: any) => (
   <div className="space-y-1">
@@ -54,10 +56,12 @@ const OrgSidebar = () => {
           className="h-10 w-10 lg:h-12 lg:w-12 rounded-lg object-contain"
         />
         <div className="md:block hidden">
-          <p className="font-bold text-gray-800 uppercase text-sm">
+          <p className="font-bold text-gray-800 dark:text-gray-300 uppercase text-sm">
             Manager Portal
           </p>
-          <p className="text-gray-600 font-md text-xs">Quản lý</p>
+          <p className="text-gray-600 dark:text-gray-400 font-md text-xs">
+            Quản lý
+          </p>
         </div>
       </div>
 
@@ -146,6 +150,11 @@ const OrgSidebar = () => {
             to={`/${orgCode}/m/semester-committees`}
             label="Hội đồng"
             icon={MdOutlineRateReview}
+          />
+          <NavItem
+            to={`/${orgCode}/m/semester-defenses`}
+            label="Bảo vệ"
+            icon={MdCoPresent}
           />
           <NavItem
             to={`/${orgCode}/m/timeline`}

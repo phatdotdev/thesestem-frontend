@@ -17,20 +17,20 @@ const CouncilManagementPage = () => {
     null,
   );
   return (
-    <div className="bg-white shadow rounded-lg border border-gray-300 p-6">
+    <div className="bg-white dark:bg-gray-900 shadow rounded-lg border border-gray-300 dark:border-gray-700 p-6">
       {/* Header */}
       <div className="flex justify-between items-center gap-4 mb-6">
         {/* left */}
         <div className="flex gap-4 items-center">
-          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 text-blue-600">
+          <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300">
             <Landmark size={26} />
           </div>
 
           <div>
-            <h1 className="text-xl font-semibold text-gray-800">
+            <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
               Quản lý hội đồng luận văn
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Quản lý vai trò giảng viên trong hội đồng chấm luận văn như chủ
               tịch, thư ký và phản biện.
             </p>
@@ -38,12 +38,13 @@ const CouncilManagementPage = () => {
         </div>
         {/* right */}
         {/* Semester */}
-        <div className="px-4 py-2 rounded-lg bg-gray-100 text-xs text-gray-700 font-semibold">
-          Học kỳ hiện tại: <span className="text-blue-500">HK1 2026</span>
+        <div className="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300 font-semibold">
+          Học kỳ hiện tại:{" "}
+          <span className="text-blue-500 dark:text-blue-300">HK1 2026</span>
         </div>
       </div>
       <div className="flex items-center justify-between">
-        <div className="font-semibold text-lg text-gray-800">
+        <div className="font-semibold text-lg text-gray-800 dark:text-gray-100">
           Danh sách hội đồng
         </div>
         <div>

@@ -1,8 +1,13 @@
-import { GraduationCap, LogOut, NotebookPen, Users } from "lucide-react";
+import { FiLogOut, FiEdit3, FiUsers } from "react-icons/fi";
+
 import { useParams } from "react-router-dom";
 import NavItem from "../../components/header/NavItem";
 import Button from "../../components/UI/Button";
 import { useAppSelector } from "../../app/hook";
+import { FaGraduationCap, FaUserTie } from "react-icons/fa";
+import { FcGraduationCap } from "react-icons/fc";
+import { FaUserGroup } from "react-icons/fa6";
+import { MdTopic } from "react-icons/md";
 
 const StdSidebar = () => {
   const { "org-code": orgCode } = useParams();
@@ -13,7 +18,7 @@ const StdSidebar = () => {
       className="
         flex flex-col
         h-screen
-        w-20 md:w-60
+        w-20 md:w-64
         bg-white dark:bg-gray-950
         border-r border-gray-200 dark:border-gray-800
         shadow-sm
@@ -30,7 +35,7 @@ const StdSidebar = () => {
               className="h-full w-full object-contain"
             />
           ) : (
-            <GraduationCap className="w-6 h-6 text-gray-400" />
+            <FaGraduationCap className="w-6 h-6 text-gray-400" />
           )}
         </div>
 
@@ -57,7 +62,7 @@ const StdSidebar = () => {
             <NavItem
               to={`/${orgCode}/s/profile`}
               label="Thông tin cá nhân"
-              icon={GraduationCap}
+              icon={FaGraduationCap}
             />
           </div>
         </div>
@@ -71,13 +76,19 @@ const StdSidebar = () => {
           <div className="flex flex-col gap-2">
             <NavItem
               to={`/${orgCode}/s/register`}
-              label="Đăng ký nhóm"
-              icon={NotebookPen}
+              label="Giảng viên hướng dẫn"
+              icon={FaUserTie}
             />
             <NavItem
               to={`/${orgCode}/s/group`}
               label="Nhóm luận văn"
-              icon={Users}
+              icon={FaUserGroup}
+            />
+
+            <NavItem
+              to={`/${orgCode}/s/theses`}
+              label="Đề tài luận văn"
+              icon={MdTopic}
             />
           </div>
         </div>
@@ -85,7 +96,7 @@ const StdSidebar = () => {
         {/* Logout */}
         <div className="mt-auto pt-6 border-t border-gray-100 dark:border-gray-800">
           <Button
-            icon={LogOut}
+            icon={FiLogOut}
             label="Đăng xuất"
             variant="ghost"
             className="

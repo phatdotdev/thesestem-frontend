@@ -30,11 +30,13 @@ const StructureManagementPage = () => {
       {/* Header */}
       <div className="flex items-center justify-between rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-6 shadow-sm">
         <div className="flex gap-4">
-          <div className="flex justify-center items-center bg-gray-100 rounded-lg p-4 text-gray-800">
+          <div className="flex justify-center items-center bg-gray-100 dark:bg-gray-800 rounded-lg p-4 text-gray-800 dark:text-gray-400">
             <Building size={28} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold">Quản lý cơ cấu tổ chức</h1>
+            <h1 className="text-2xl font-semibold dark:text-white">
+              Quản lý cơ cấu tổ chức
+            </h1>
             <p className="text-sm text-gray-500">
               Quản lý thông tin các đơn vị trực thuộc
             </p>

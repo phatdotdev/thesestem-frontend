@@ -4,6 +4,8 @@ import Button from "../../../components/UI/Button";
 import type { GroupResponse } from "../../../types/group";
 import type { StudentResponse } from "../../../types/student";
 import { useState } from "react";
+import { useAssignStudentToGroupMutation } from "../../../services/groupApi";
+import { useAppDispatch } from "../../../app/hook";
 
 interface SelectGroupModalProps {
   open: boolean;
@@ -19,7 +21,22 @@ const SelectGroupModal = ({
   student,
 }: SelectGroupModalProps) => {
   const [currentGroup, setCurrentGroup] = useState<GroupResponse | null>(null);
+  const [addStudentToGroup] = useAssignStudentToGroupMutation();
 
+  const dispatch = useAppDispatch();
+
+  const handleAddStudentToGroup = async () => {
+    if (!currentGroup || !student) return;
+    try {
+      await addStudentToGroup({
+        groupId: currentGroup.id,
+        studentId: student.id,
+      }).unwrap();
+      onClose();
+    } catch (error) {
+      dispatch({ type: "error", message: "Thêm sinh viên vào nhóm thất bại" });
+    }
+  };
   return (
     <Modal open={open} onClose={onClose}>
       <div className="space-y-6 w-[500px] max-w-full">
@@ -81,10 +98,7 @@ const SelectGroupModal = ({
             label="Xác nhận"
             variant="primary"
             disabled={!currentGroup}
-            onClick={() => {
-              console.log("Selected group:", currentGroup);
-              onClose();
-            }}
+            onClick={handleAddStudentToGroup}
           />
         </div>
       </div>

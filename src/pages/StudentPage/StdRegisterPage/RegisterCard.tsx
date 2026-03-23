@@ -26,7 +26,9 @@ const RegisterCard = ({
   return (
     <div
       className="
-      group bg-white border border-gray-200
+      group 
+      bg-white dark:bg-gray-900 
+      border border-gray-200 dark:border-gray-700
       rounded-2xl p-4
       shadow-sm hover:shadow-lg
       hover:-translate-y-0.5
@@ -38,25 +40,30 @@ const RegisterCard = ({
         <div
           className="
           h-9 w-9 rounded-full
-          bg-gray-200
+          bg-gray-200 dark:bg-gray-700
           flex items-center justify-center
-          text-gray-600 text-sm font-semibold
+          text-gray-600 dark:text-gray-300
+          text-sm font-semibold
         "
         >
-          {mentor.fullName?.charAt(0) || <User size={18} />}
+          {mentor.fullName?.charAt(0) || (
+            <User size={18} className="text-gray-500 dark:text-gray-400" />
+          )}
         </div>
 
         <div className="leading-tight">
-          <h3 className="font-semibold text-sm text-gray-800">
+          <h3 className="font-semibold text-sm text-gray-800 dark:text-gray-100">
             {mentor.fullName}
           </h3>
 
-          <p className="text-xs text-gray-500">{mentor.email}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {mentor.email}
+          </p>
         </div>
       </div>
 
       {/* Info */}
-      <div className="mt-3 text-xs text-gray-600">
+      <div className="mt-3 text-xs text-gray-600 dark:text-gray-400">
         <p>
           {mentor.lecturerCode} • {unit}
         </p>
@@ -75,6 +82,7 @@ const RegisterCard = ({
           variant="outline"
           onClick={() => onView?.(register)}
         />
+
         <Button
           label="Hủy yêu cầu"
           size="sm"

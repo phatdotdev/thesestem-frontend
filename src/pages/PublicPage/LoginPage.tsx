@@ -20,7 +20,7 @@ const LoginPage = () => {
       dispatch(
         addToast({
           type: "error",
-          message: "Vui lòng nhập đầy đủ email và mật khẩu!",
+          message: "Vui lòng nhập đầy đủ thông tin!",
         }),
       );
       return;
@@ -36,6 +36,12 @@ const LoginPage = () => {
       } else {
         navigate(`/${data.code}/m`);
       }
+      dispatch(
+        addToast({
+          type: "success",
+          message: "Đăng nhập thành công!",
+        }),
+      );
     } catch (error: any) {
       dispatch(addToast({ type: "error", message: "Đăng nhập thất bại" }));
     }
@@ -104,7 +110,7 @@ const LoginPage = () => {
             <div className="h-px flex-1 bg-gray-200 dark:bg-gray-800" />
           </div>
           <Button
-            className="w-full bg-red-500 hover:bg-red-600"
+            className="w-full bg-red-500 hover:bg-red-600 dark:bg-red-600 dark:hover:bg-red-700"
             icon={FaGoogle}
             label="Đăng nhập với Google"
             type="button"

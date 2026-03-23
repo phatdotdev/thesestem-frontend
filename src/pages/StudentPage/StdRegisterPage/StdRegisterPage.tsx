@@ -23,7 +23,7 @@ const StdRegisterPage = () => {
   const registers = registerResponse?.data ?? [];
   const mentors = data?.data.content ?? [];
 
-  /* ================= STATUS SETS (O(1) lookup) ================= */
+  /* ================= STATUS SETS ================= */
 
   const { pendingIds, acceptedIds, rejectedIds, cancelledIds, hasAccepted } =
     useMemo(() => {
@@ -79,21 +79,21 @@ const StdRegisterPage = () => {
   };
 
   return (
-    <div className="space-y-6 py-6 bg-white border border-gray-300 shadow rounded-lg">
+    <div className="space-y-6 py-6 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 shadow rounded-lg">
       {/* ================= HEADER ================= */}
 
-      <div className="bg-white px-6 rounded-xl flex items-start justify-between gap-4">
+      <div className="bg-white dark:bg-gray-900 px-6 rounded-xl flex items-start justify-between gap-4">
         <div className="flex gap-4">
-          <div className="p-4 bg-blue-100 text-blue-500 rounded-lg">
+          <div className="p-4 bg-blue-100 dark:bg-blue-900/30 text-blue-500 rounded-lg">
             <GraduationCap size={26} />
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold text-gray-800 tracking-tight">
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-gray-100 tracking-tight">
               Đăng ký giảng viên hướng dẫn
             </h1>
 
-            <p className="text-gray-500 max-w-xl leading-relaxed">
+            <p className="text-gray-500 dark:text-gray-400 max-w-xl leading-relaxed">
               Tìm kiếm giảng viên phù hợp với đề tài của bạn và yêu cầu hướng
               dẫn.
             </p>
@@ -108,13 +108,13 @@ const StdRegisterPage = () => {
       <div className="px-6 rounded-xl space-y-8">
         {/* ===== Tabs ===== */}
 
-        <div className="flex gap-3 bg-gray-100 p-1 rounded-2xl w-fit">
+        <div className="flex gap-3 bg-gray-100 dark:bg-gray-800 p-1 rounded-2xl w-fit">
           <button
             onClick={() => setActiveTab("search")}
             className={`px-5 py-2 text-sm font-medium rounded-xl transition ${
               activeTab === "search"
-                ? "bg-white shadow text-blue-600"
-                : "text-gray-600 hover:text-gray-800"
+                ? "bg-white dark:bg-gray-900 shadow text-blue-600"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             }`}
           >
             Đăng ký giảng viên
@@ -124,12 +124,12 @@ const StdRegisterPage = () => {
             onClick={() => setActiveTab("registered")}
             className={`px-5 py-2 text-sm font-medium rounded-xl transition flex items-center gap-2 ${
               activeTab === "registered"
-                ? "bg-white shadow text-blue-600"
-                : "text-gray-600 hover:text-gray-800"
+                ? "bg-white dark:bg-gray-900 shadow text-blue-600"
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
             }`}
           >
             Giảng viên đã đăng ký
-            <span className="text-xs bg-gray-200 px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-0.5 rounded-full">
               {registers.length}
             </span>
           </button>
@@ -141,10 +141,13 @@ const StdRegisterPage = () => {
           <>
             {/* Search Filter */}
 
-            <div className="bg-gray-50 border border-gray-200 rounded-2xl p-4 space-y-3">
+            <div className="bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-4 space-y-3">
               <div className="flex gap-2 items-center">
-                <UserSearch size={20} />
-                <h2 className="text-lg font-semibold text-gray-700">
+                <UserSearch
+                  size={20}
+                  className="text-gray-700 dark:text-gray-300"
+                />
+                <h2 className="text-lg font-semibold text-gray-700 dark:text-gray-200">
                   Tìm kiếm giảng viên
                 </h2>
               </div>
@@ -170,9 +173,12 @@ const StdRegisterPage = () => {
             {isLoading ? (
               <Loader />
             ) : mentors.length === 0 ? (
-              <div className="text-center py-16 border border-dashed rounded-3xl bg-gray-50">
-                <User className="mx-auto text-gray-400 mb-4" size={36} />
-                <p className="font-semibold text-gray-600 text-lg">
+              <div className="text-center py-16 border border-dashed border-gray-300 dark:border-gray-700 rounded-3xl bg-gray-50 dark:bg-gray-800">
+                <User
+                  className="mx-auto text-gray-400 dark:text-gray-500 mb-4"
+                  size={36}
+                />
+                <p className="font-semibold text-gray-600 dark:text-gray-300 text-lg">
                   Không tìm thấy giảng viên phù hợp
                 </p>
               </div>
@@ -210,8 +216,10 @@ const StdRegisterPage = () => {
         {activeTab === "registered" && (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {registers.length === 0 ? (
-              <div className="text-center py-16 border border-dashed rounded-3xl bg-gray-50 col-span-full">
-                <p className="text-gray-500">Bạn chưa đăng ký giảng viên nào</p>
+              <div className="text-center py-16 border border-dashed border-gray-300 dark:border-gray-700 rounded-3xl bg-gray-50 dark:bg-gray-800 col-span-full">
+                <p className="text-gray-500 dark:text-gray-400">
+                  Bạn chưa đăng ký giảng viên nào
+                </p>
               </div>
             ) : (
               registers.map((register: any) => (
