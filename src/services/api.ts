@@ -74,14 +74,8 @@ export const baseQueryWithReauth: BaseQueryFn<
 
       if (refreshResult.data) {
         const newToken = (refreshResult.data as any).data.accessToken;
-
-        // ✅ Lưu token mới
         api.dispatch(loginSuccess({ token: newToken }));
-
-        // Đánh thức các request đang đợi
         onRefreshed();
-
-        // ✅ Retry request gốc (prepareHeaders tự lấy token mới)
         result = await rawBaseQuery(originalRequest, api, extraOptions);
       } else {
         api.dispatch(logout());
@@ -94,7 +88,6 @@ export const baseQueryWithReauth: BaseQueryFn<
       isRefreshing = false;
     }
   } else {
-    // ⏳ Các request khác đợi refresh
     return new Promise((resolve) => {
       subscribeTokenRefresh(() => {
         resolve(rawBaseQuery(originalRequest, api, extraOptions));
@@ -133,11 +126,13 @@ export const api = createApi({
     "SemesterStudent",
     "SemesterMentor",
     "Register",
+    "Milestone",
 
     /* GROUP */
     "Group",
     "GroupStudent",
     "Assignment",
+    "AssignmentSubmission",
     "Topic",
 
     /* THESIS */
@@ -163,9 +158,20 @@ export const api = createApi({
 
     /* NOTIFICATION (nếu có) */
     "Notification",
+    "SystemNotification",
+    "ChatMessage",
 
     /* MEETING (nếu có) */
     "Meeting",
+
+    /* CATALOG */
+    "Course",
+    "Role",
+
+    /* STATS */
+    "Statistics",
+
+    "Field",
   ],
 
   endpoints: () => ({}),

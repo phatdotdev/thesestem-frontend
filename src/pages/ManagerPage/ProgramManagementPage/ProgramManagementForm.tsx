@@ -1,6 +1,7 @@
 import Input from "../../../components/UI/Input";
 import Select from "../../../components/UI/Select";
 import Button from "../../../components/UI/Button";
+import Textarea from "../../../components/UI/TextArea";
 import {
   useCreateProgramMutation,
   useLazyGetCollegesQuery,
@@ -35,7 +36,8 @@ const TrainingProgramForm = ({
   onClose: () => void;
   program: ProgramResponse | null;
 }) => {
-  // FORM STATE
+  /* ================= STATE ================= */
+
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -43,12 +45,43 @@ const TrainingProgramForm = ({
   const [managedType, setManagedType] = useState<OrgUnitType | "">("");
   const [managedUnitId, setManagedUnitId] = useState("");
 
+  const [options, setOptions] = useState<{ label: string; value: string }[]>(
+    [],
+  );
+
+  /* ================= API ================= */
+
+  const [getColleges] = useLazyGetCollegesQuery();
+  const [getFaculties] = useLazyGetFacultiesQuery();
+  const [getDepartments] = useLazyGetDeparmentsQuery();
+
+  const [createProgram, { isLoading: isCreating }] = useCreateProgramMutation();
+
+  const [updateProgram, { isLoading: isUpdating }] = useUpdateProgramMutation();
+
+  const isLoading = isCreating || isUpdating;
+
+  /* ================= RESET ================= */
+
+  const resetForm = () => {
+    setCode("");
+    setName("");
+    setDescription("");
+    setDegree("");
+    setManagedType("");
+    setManagedUnitId("");
+    setOptions([]);
+  };
+
+  /* ================= LOAD PROGRAM ================= */
+
   useEffect(() => {
     if (program) {
       setCode(program.code);
       setName(program.name);
       setDescription(program.description);
       setDegree(program.degree);
+
       setManagedType(
         program.college
           ? "COLLEGE"
@@ -58,26 +91,20 @@ const TrainingProgramForm = ({
               ? "DEPARTMENT"
               : "",
       );
+
       setManagedUnitId(
         program?.college?.id ||
           program?.faculty?.id ||
           program?.department?.id ||
           "",
       );
+    } else {
+      resetForm();
     }
   }, [program]);
-  // OPTIONS
-  const [options, setOptions] = useState<{ label: string; value: string }[]>(
-    [],
-  );
 
-  // API
-  const [getColleges] = useLazyGetCollegesQuery();
-  const [getFaculties] = useLazyGetFacultiesQuery();
-  const [getDepartments] = useLazyGetDeparmentsQuery();
-  const [createProgram, { isLoading: isCreating }] = useCreateProgramMutation();
-  const [updateProgram, { isLoading: isUpdating }] = useUpdateProgramMutation();
-  const isLoading = isCreating || isUpdating;
+  /* ================= FETCH ORG UNITS ================= */
+
   useEffect(() => {
     const fetchUnits = async () => {
       if (!managedType) {
@@ -88,45 +115,40 @@ const TrainingProgramForm = ({
 
       let data: any;
 
-      if (managedType === "COLLEGE") {
-        data = await getColleges().unwrap();
-      }
-      if (managedType === "FACULTY") {
-        data = await getFaculties().unwrap();
-      }
-      if (managedType === "DEPARTMENT") {
-        data = await getDepartments().unwrap();
-      }
+      try {
+        if (managedType === "COLLEGE") {
+          data = await getColleges().unwrap();
+        } else if (managedType === "FACULTY") {
+          data = await getFaculties().unwrap();
+        } else if (managedType === "DEPARTMENT") {
+          data = await getDepartments().unwrap();
+        }
 
-      setOptions(
-        data.data.map((item: any) => ({
-          label: item.name,
-          value: item.id,
-        })),
-      );
+        setOptions(
+          data.data.map((item: any) => ({
+            label: item.name,
+            value: item.id,
+          })),
+        );
+      } catch (err) {
+        console.error(err);
+      }
     };
 
     fetchUnits();
   }, [managedType]);
 
-  const handleSubmit = async () => {
-    if (!managedType) return;
+  /* ================= SUBMIT ================= */
 
-    if (!program) {
-      await createProgram({
-        code,
-        name,
-        description,
-        degree,
-        managedType,
-        collegeId: managedType === "COLLEGE" ? managedUnitId : null,
-        facultyId: managedType === "FACULTY" ? managedUnitId : null,
-        departmentId: managedType === "DEPARTMENT" ? managedUnitId : null,
-      }).unwrap();
-    } else {
-      await updateProgram({
-        id: program.id,
-        data: {
+  const handleSubmit = async () => {
+    if (!code || !name || !degree || !managedType || !managedUnitId) {
+      alert("Vui lòng nhập đầy đủ thông tin");
+      return;
+    }
+
+    try {
+      if (!program) {
+        await createProgram({
           code,
           name,
           description,
@@ -135,29 +157,68 @@ const TrainingProgramForm = ({
           collegeId: managedType === "COLLEGE" ? managedUnitId : null,
           facultyId: managedType === "FACULTY" ? managedUnitId : null,
           departmentId: managedType === "DEPARTMENT" ? managedUnitId : null,
-        },
-      }).unwrap();
-    }
+        }).unwrap();
+      } else {
+        await updateProgram({
+          id: program.id,
+          data: {
+            code,
+            name,
+            description,
+            degree,
+            managedType,
+            collegeId: managedType === "COLLEGE" ? managedUnitId : null,
+            facultyId: managedType === "FACULTY" ? managedUnitId : null,
+            departmentId: managedType === "DEPARTMENT" ? managedUnitId : null,
+          },
+        }).unwrap();
+      }
 
-    onClose();
+      resetForm();
+      onClose();
+    } catch (err) {
+      console.error(err);
+    }
   };
 
+  /* ================= UI ================= */
+
   return (
-    <Modal open={open} onClose={onClose} width="max-w-2xl">
-      <div className="p-2 space-y-6">
-        {/* Header */}
-        <div className="flex gap-3 items-center">
-          <div className="p-3 rounded-lg flex items-center justify-center bg-blue-100 text-blue-500">
+    <Modal
+      open={open}
+      onClose={() => {
+        resetForm();
+        onClose();
+      }}
+      width="max-w-2xl"
+    >
+      <div className="space-y-5">
+        <div className="flex items-start gap-3">
+          <div
+            className="
+            w-10 h-10 rounded-xl flex items-center justify-center
+            bg-blue-100 dark:bg-blue-900/40
+            text-blue-500 dark:text-blue-400
+          "
+          >
             <Book />
           </div>
-          <h2 className="font-semibold text-lg">
-            {!program
-              ? "Tạo chương trình đào tạo"
-              : "Cập nhật chương trình đào tạo"}
-          </h2>
+
+          <div>
+            <h2 className="text-base font-bold text-gray-900 dark:text-gray-100">
+              {!program
+                ? "Tạo chương trình đào tạo"
+                : "Cập nhật chương trình đào tạo"}
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+              Khai báo thông tin chương trình và đơn vị quản lý tương ứng
+            </p>
+          </div>
         </div>
-        {/* Form */}
-        <div className="space-y-4">
+
+        <div className="h-px bg-gray-100 dark:bg-gray-800" />
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label="Mã ngành"
             value={code}
@@ -172,16 +233,12 @@ const TrainingProgramForm = ({
             required
           />
 
-          {/* Mô tả */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-gray-700">
-              Giới thiệu chương trình
-            </label>
-            <textarea
+          <div className="sm:col-span-2">
+            <Textarea
               rows={4}
+              label="Giới thiệu chương trình"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
             />
           </div>
 
@@ -210,18 +267,24 @@ const TrainingProgramForm = ({
             onChange={(e) => setManagedUnitId(e.target.value)}
             options={[{ label: "Chọn đơn vị quản lý", value: "" }, ...options]}
             disabled={!managedType}
-            required={managedType !== "COLLEGE"}
+            required
           />
         </div>
-        {/* Actions */}
-        <div className="flex justify-end gap-3 pt-3">
+
+        <div className="h-px bg-gray-100 dark:bg-gray-800" />
+
+        <div className="flex justify-end gap-3">
           <Button
             label="Hủy"
-            variant="ghost"
-            className="border border-gray-300"
+            variant="outline"
+            onClick={() => {
+              resetForm();
+              onClose();
+            }}
           />
+
           <Button
-            label="Lưu chương trình"
+            label={isLoading ? "Đang lưu..." : "Lưu chương trình"}
             onClick={handleSubmit}
             disabled={isLoading}
           />

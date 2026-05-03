@@ -25,11 +25,7 @@ const OAuth2Redirect = () => {
 
     const accessToken = decodeURIComponent(rawAccessToken);
 
-    console.log("accessToken:", accessToken);
-    console.log("code:", code);
-
     dispatch(loginSuccess({ token: accessToken }));
-    localStorage.setItem("accessToken", accessToken);
 
     navigate(`/${code}/m`, { replace: true });
   }, [dispatch, navigate]);

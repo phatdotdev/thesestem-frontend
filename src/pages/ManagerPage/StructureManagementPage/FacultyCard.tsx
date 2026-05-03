@@ -11,6 +11,10 @@ import Button from "../../../components/UI/Button";
 import { useState } from "react";
 import DepartmentForm from "./DepartmentForm";
 import { useDeleteFacultyMutation } from "../../../services/orgApi";
+import { useAppDispatch } from "../../../app/hook";
+import { addToast } from "../../../features/notification/toastSlice";
+import ConfirmModal from "../../../components/UI/ConfirmModal";
+import FacultyForm from "./FacultyForm";
 
 export const FacultyCard = ({
   faculty,
@@ -21,20 +25,27 @@ export const FacultyCard = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
-  const [showForm, setShowForm] = useState(false);
-  const [deleteFaculty] = useDeleteFacultyMutation();
+  const [openAddDepartmentForm, setOpenAddDepartmentForm] = useState(false);
+  const [openUpdateFacultyForm, setOpenUpdateFacultyForm] = useState(false);
+  const dispatch = useAppDispatch();
+  const [deleteFaculty, { isLoading: isDeleting }] = useDeleteFacultyMutation();
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
   const deleteFacultyById = async () => {
-    if (confirm("Xác nhận xóa?")) {
+    try {
       await deleteFaculty(faculty.id).unwrap();
+      setOpenDeleteModal(false);
+      dispatch(addToast({ type: "success", message: "Xóa khoa thành công" }));
+    } catch (error) {
+      console.log(error);
+      dispatch(addToast({ type: "error", message: "Không thể xóa khoa" }));
     }
   };
 
   return (
-    <div className="flex justify-between bg-white dark:bg-gray-800 px-4 rounded-lg border border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 hover:shadow-sm transition-all duration-200">
-      {/* LEFT */}
-      <div className="flex gap-4 items-center py-5">
-        <div className="p-2 bg-gray-100 dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-200">
+    <div className="flex justify-between rounded-lg border border-gray-200 bg-white px-4 transition-all duration-200 hover:border-gray-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600">
+      <div className="flex items-center gap-4 py-4">
+        <div className="rounded-lg border border-gray-200 bg-gray-100 p-2 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
           <Users size={26} />
         </div>
 
@@ -42,35 +53,33 @@ export const FacultyCard = ({
           <h3 className="font-semibold text-gray-900 dark:text-gray-100">
             {faculty.name}
           </h3>
-          <span className="text-sm text-gray-500 dark:text-gray-400">
-            {faculty.code}
+          <span className="inline-flex rounded-full border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            {faculty.code || "Chưa có mã"}
           </span>
         </div>
       </div>
 
-      {/* ACTIONS */}
       <div className="flex gap-2 items-center">
         <Button
           icon={Plus}
           size="sm"
           variant="outline"
-          className="hover:bg-green-50 dark:hover:bg-green-900/30 dark:hover:text-green-400"
-          onClick={() => setShowForm(true)}
+          onClick={() => setOpenAddDepartmentForm(true)}
         />
 
         <Button
           icon={Edit}
           size="sm"
           variant="outline"
-          className="hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
+          onClick={() => setOpenUpdateFacultyForm(true)}
         />
 
         <Button
           icon={Trash2}
           size="sm"
-          variant="outline"
-          className="hover:bg-red-50 dark:hover:bg-red-900/30 dark:hover:text-red-400"
-          onClick={deleteFacultyById}
+          variant="outline-danger"
+          loading={isDeleting}
+          onClick={() => setOpenDeleteModal(true)}
         />
 
         <Button
@@ -85,9 +94,27 @@ export const FacultyCard = ({
       {/* MODAL */}
       <DepartmentForm
         initialData={null}
-        open={showForm}
-        onClose={() => setShowForm(false)}
+        open={openAddDepartmentForm}
+        onClose={() => setOpenAddDepartmentForm(false)}
         facultyId={faculty.id}
+      />
+
+      <FacultyForm
+        collegeId=""
+        initialData={faculty}
+        open={openUpdateFacultyForm}
+        onClose={() => setOpenUpdateFacultyForm(false)}
+      />
+
+      <ConfirmModal
+        open={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={deleteFacultyById}
+        title="Xóa khoa?"
+        description={`Bạn có chắc muốn xóa khoa ${faculty.name}? Hành động này không thể hoàn tác.`}
+        confirmText="Xác nhận xóa"
+        type="danger"
+        loading={isDeleting}
       />
     </div>
   );

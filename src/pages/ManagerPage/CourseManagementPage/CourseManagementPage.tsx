@@ -2,6 +2,9 @@ import { Edit, Trash2, BookOpen, Plus } from "lucide-react";
 import { useMemo, useState } from "react";
 import Button from "../../../components/UI/Button";
 import Badge from "../../../components/UI/Badge";
+import ConfirmModal from "../../../components/UI/ConfirmModal";
+import { useAppDispatch } from "../../../app/hook";
+import { addToast } from "../../../features/notification/toastSlice";
 
 import CourseForm from "./CourseForm";
 import {
@@ -15,22 +18,46 @@ const formatDate = (date?: string) =>
 const CourseManagementPage = () => {
   const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
   const [openCourse, setOpenCourse] = useState(false);
+  const [openConfirm, setOpenConfirm] = useState(false);
+  const [deletingCourseId, setDeletingCourseId] = useState<string | null>(null);
 
   const { data, refetch } = useGetCoursesQuery();
   const courses = data?.data ?? [];
+  const dispatch = useAppDispatch();
 
   const selectedCourse = useMemo(
     () => courses.find((c: any) => c.id === selectedCourseId) ?? null,
     [courses, selectedCourseId],
   );
 
-  const [deleteCourse] = useDeleteCourseMutation();
+  const [deleteCourse, { isLoading: isDeletingCourse }] =
+    useDeleteCourseMutation();
 
-  const deleteCourseById = async (id: string) => {
-    if (confirm("Xác nhận xóa khóa học?")) {
-      await deleteCourse(id).unwrap();
+  const deletingCourse =
+    courses.find((course: any) => course.id === deletingCourseId) ?? null;
+
+  const handleDeleteCourse = async () => {
+    if (!deletingCourseId) return;
+
+    try {
+      await deleteCourse(deletingCourseId).unwrap();
       setSelectedCourseId(null);
+      setDeletingCourseId(null);
+      setOpenConfirm(false);
       refetch();
+      dispatch(
+        addToast({
+          type: "success",
+          message: "Xóa khóa học thành công",
+        }),
+      );
+    } catch {
+      dispatch(
+        addToast({
+          type: "error",
+          message: "Không thể xóa khóa học",
+        }),
+      );
     }
   };
 
@@ -132,7 +159,10 @@ const CourseManagementPage = () => {
                       size="sm"
                       variant="danger"
                       icon={Trash2}
-                      onClick={() => deleteCourseById(c.id)}
+                      onClick={() => {
+                        setDeletingCourseId(c.id);
+                        setOpenConfirm(true);
+                      }}
                     />
                   </td>
                 </tr>
@@ -155,6 +185,21 @@ const CourseManagementPage = () => {
           await refetch();
           setOpenCourse(false);
         }}
+      />
+
+      <ConfirmModal
+        open={openConfirm}
+        onClose={() => {
+          setOpenConfirm(false);
+          setDeletingCourseId(null);
+        }}
+        onConfirm={handleDeleteCourse}
+        type="danger"
+        title="Xóa khóa học"
+        description={`Bạn có chắc chắn muốn xóa khóa học ${deletingCourse?.name || "này"}? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        loading={isDeletingCourse}
       />
     </div>
   );

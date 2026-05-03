@@ -9,6 +9,7 @@ import {
   useGetRolesQuery,
 } from "../../../services/catApi";
 import Badge from "../../../components/UI/Badge";
+import { useLazySearchCouncilsBySemesterQuery } from "../../../services/semApi";
 
 const CouncilRoleManagementPage = () => {
   const [openForm, setOpenForm] = useState(false);
@@ -17,6 +18,8 @@ const CouncilRoleManagementPage = () => {
   const [deletingRole, setDeletingRole] = useState<CouncilRole | null>(null);
 
   const [deleteRole] = useDeleteRoleMutation();
+
+  useLazySearchCouncilsBySemesterQuery();
 
   const { data: rolesResponse } = useGetRolesQuery();
   const roles = rolesResponse?.data || [];

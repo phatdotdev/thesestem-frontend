@@ -3,7 +3,7 @@ import Modal from "../../../../components/UI/Modal";
 import type { TopicResponse } from "../../../../types/group";
 import Input from "../../../../components/UI/Input";
 import Textarea from "../../../../components/UI/TextArea";
-import { BookOpen, FileText, TextInitial, Users } from "lucide-react";
+import { BookOpen, FileText, Users } from "lucide-react";
 import Button from "../../../../components/UI/Button";
 import {
   useCreateTopicMutation,
@@ -33,7 +33,12 @@ const TopicFormModal = ({
       setTitle(initialData.title);
       setDescription(initialData.description);
       setMaxStudents(initialData.maxStudents);
+      return;
     }
+
+    setTitle("");
+    setDescription("");
+    setMaxStudents(1);
   }, [initialData]);
 
   const handleSubmit = async () => {
@@ -56,14 +61,14 @@ const TopicFormModal = ({
       <div className="p-2 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-blue-100 text-blue-600">
+          <div className="rounded-xl border border-blue-200 bg-blue-50 p-2 text-blue-600 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-300">
             <BookOpen size={20} />
           </div>
           <div>
-            <h1 className="text-lg font-semibold">
+            <h1 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
               {initialData ? "Chỉnh sửa đề tài" : "Tạo đề tài mới"}
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {initialData
                 ? "Cập nhật thông tin đề tài"
                 : "Nhập thông tin để tạo đề tài mới"}

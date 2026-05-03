@@ -1,15 +1,15 @@
-import { Edit, Pencil } from "lucide-react";
-import { getColor } from "../../../../utils/getColor";
-import { getInitials } from "../../../../utils/getInitials";
+import { Edit, Trash2 } from "lucide-react";
 import Button from "../../../../components/UI/Button";
+import AvatarInitial from "../../../../components/UI/AvatarInitial";
 
 type Props = {
   score: any;
   isMe?: boolean;
   onEdit?: (score: any) => void;
+  onDelete?: (score: any) => void;
 };
 
-const ScoreCard = ({ score, isMe, onEdit }: Props) => {
+const ScoreCard = ({ score, isMe, onEdit, onDelete }: Props) => {
   const lecturer = score?.member?.lecturer;
   const role = score?.member?.role;
 
@@ -19,16 +19,27 @@ const ScoreCard = ({ score, isMe, onEdit }: Props) => {
     if (value >= 8)
       return {
         bar: "bg-emerald-400",
-        box: "bg-emerald-50 border-emerald-200 text-emerald-600",
+        box: `
+          bg-emerald-50 border-emerald-200 text-emerald-600
+          dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-300
+        `,
       };
+
     if (value >= 5)
       return {
         bar: "bg-amber-400",
-        box: "bg-amber-50 border-amber-200 text-amber-600",
+        box: `
+          bg-amber-50 border-amber-200 text-amber-600
+          dark:bg-amber-900/20 dark:border-amber-800 dark:text-amber-300
+        `,
       };
+
     return {
       bar: "bg-red-400",
-      box: "bg-red-50 border-red-200 text-red-600",
+      box: `
+        bg-red-50 border-red-200 text-red-600
+        dark:bg-red-900/20 dark:border-red-800 dark:text-red-300
+      `,
     };
   };
 
@@ -37,45 +48,64 @@ const ScoreCard = ({ score, isMe, onEdit }: Props) => {
   return (
     <div
       className={`
-        relative rounded-xl border bg-white overflow-hidden transition
-        ${isMe ? "border-blue-300 ring-1 ring-blue-100" : "border-gray-200"}
+        relative rounded-xl border overflow-hidden transition
+        bg-white dark:bg-gray-900
+        border-gray-200 dark:border-gray-800
+        hover:shadow-md
+
+        ${isMe ? "ring-1 ring-blue-200 dark:ring-blue-800 border-blue-300 dark:border-blue-700" : ""}
       `}
     >
-      <div className="px-4 pt-4 flex items-start justify-between gap-4">
+      <div className="px-4 py-4 flex items-start justify-between gap-4">
         {/* LEFT */}
         <div className="flex items-start gap-3 min-w-0">
           {/* AVATAR */}
-          <div
-            className={`
-              w-9 h-9 rounded-full flex items-center justify-center
-              text-white text-xs font-bold shrink-0
-              ${getColor(lecturer?.fullName)}
-            `}
-          >
-            {getInitials(lecturer?.fullName)}
-          </div>
+          <AvatarInitial fullName={lecturer?.fullName} size={32} />
 
           {/* INFO */}
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-gray-800 truncate">
+            {/* NAME */}
+            <p className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate">
               {lecturer?.fullName || "Ẩn danh"}{" "}
-              {isMe && <span className="text-blue-500">(bạn)</span>}
+              {lecturer?.lecturerCode && `- ${lecturer.lecturerCode}`}
+              {isMe && (
+                <span className="text-blue-500 dark:text-blue-400 text-xs">
+                  {" "}
+                  (bạn)
+                </span>
+              )}
             </p>
 
-            <p className="text-[11px] text-gray-400">
+            {/* ROLE */}
+            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               {role?.name || "Thành viên"}
             </p>
 
+            {/* TIME */}
             {score?.createdAt && (
-              <p className="text-[10px] text-gray-400 mt-1">
+              <p className="text-[11px] text-gray-400 dark:text-gray-500 mt-1">
                 {new Date(score.createdAt).toLocaleString("vi-VN")}
               </p>
             )}
 
+            {/* COMMENT */}
             {score?.comment && (
-              <p className="text-xs text-gray-600 mt-2 leading-relaxed border-l-2 border-gray-200 pl-2 italic">
+              <div
+                className="
+                  mt-2
+                  text-xs
+                  text-gray-700 dark:text-gray-300
+                  border-gray-200 dark:border-gray-700
+                  pl-3
+                  italic
+                  leading-relaxed
+                  bg-gray-50 dark:bg-gray-800
+                  rounded-md
+                  py-1.5 px-2
+                "
+              >
                 {score.comment}
-              </p>
+              </div>
             )}
           </div>
         </div>
@@ -84,7 +114,7 @@ const ScoreCard = ({ score, isMe, onEdit }: Props) => {
         <div
           className={`
             shrink-0 flex flex-col items-center justify-center
-            w-14 h-14 rounded-xl border font-bold text-lg leading-none
+            w-16 h-16 rounded-xl border font-bold text-xl leading-none
             ${color.box}
           `}
         >
@@ -94,16 +124,33 @@ const ScoreCard = ({ score, isMe, onEdit }: Props) => {
           </span>
         </div>
       </div>
+
+      {/* ACTION */}
       {isMe && (
-        <div className="flex justify-end gap-2 px-4 py-2">
+        <div
+          className="
+            flex justify-end gap-2
+            px-4 py-2
+            border-t
+            border-gray-100 dark:border-gray-800
+            bg-gray-50 dark:bg-gray-800/40
+          "
+        >
           <Button
             variant="outline-primary"
             label="Chỉnh sửa"
             icon={Edit}
             size="xs"
-            onClick={onEdit}
+            onClick={() => onEdit?.(score)}
           />
-          <Button variant="outline" label="Xóa" icon={Edit} size="xs" />
+
+          <Button
+            variant="outline"
+            label="Xóa"
+            icon={Trash2}
+            size="xs"
+            onClick={() => onDelete?.(score)}
+          />
         </div>
       )}
     </div>

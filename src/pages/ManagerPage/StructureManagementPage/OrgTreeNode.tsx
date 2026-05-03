@@ -13,12 +13,11 @@ export const OrgTreeNode = ({ node, isRoot }: OrgTreeNodeProps) => {
   const [open, setOpen] = useState(false);
   return (
     <div className="relative">
-      {/* Line chỉ vẽ nếu KHÔNG phải root */}
       {!isRoot && (
         <>
-          <div className="absolute left-0 top-0 bottom-0 w-px bg-gray-300" />
-          <div className="absolute left-0 top-10 w-6 h-px bg-gray-300" />
-          <div className="absolute left-0 top-10 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-gray-400 ring-2 ring-white" />
+          <div className="absolute bottom-0 left-0 top-0 w-px bg-slate-300 dark:bg-slate-700" />
+          <div className="absolute left-0 top-10 h-px w-6 bg-slate-300 dark:bg-slate-700" />
+          <div className="absolute left-0 top-10 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-sky-500 ring-2 ring-white dark:ring-slate-900" />
         </>
       )}
 
@@ -27,7 +26,7 @@ export const OrgTreeNode = ({ node, isRoot }: OrgTreeNodeProps) => {
       </div>
 
       {open && node.children && node.children?.length > 0 && (
-        <div className="relative ml-10">
+        <div className="relative ml-10 space-y-1">
           {node.children.map((child) => (
             <div key={child.id}>
               <OrgTreeNode node={child} />

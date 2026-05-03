@@ -9,7 +9,7 @@ import {
   useUpdateRoleMutation,
 } from "../../../services/catApi";
 import { useAppDispatch } from "../../../app/hook";
-import { addToast } from "../../../features/notification/notificationSlice";
+import { addToast } from "../../../features/notification/toastSlice";
 
 interface CouncilRoleModalProps {
   open: boolean;
@@ -88,7 +88,6 @@ const CouncilRoleModal = ({ open, onClose, data }: CouncilRoleModalProps) => {
             name="code"
             value={form.code}
             onChange={handleChange}
-            disabled={!!data}
             placeholder="CHAIRMAN"
           />
         </div>

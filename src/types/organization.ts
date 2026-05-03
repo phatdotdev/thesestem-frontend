@@ -6,6 +6,8 @@ export interface CouncilRole {
 }
 
 export type OrgProps = {
+  role?: string;
+  type: string;
   name: string;
   code: string;
   email: string;

@@ -1,6 +1,7 @@
 import { CalendarDays, Edit, PlusCircle, Trash2 } from "lucide-react";
 import { useMemo, useState } from "react";
 import Button from "../../../components/UI/Button";
+import ConfirmModal from "../../../components/UI/ConfirmModal";
 import {
   useDeleteSemesterMutation,
   useDeleteYearMutation,
@@ -15,14 +16,34 @@ import SemesterRow from "./SemesterRow";
 const formatDate = (date?: string) =>
   date ? new Date(date).toLocaleDateString("vi-VN") : "";
 
+type PendingAction =
+  | {
+      type: "delete-year";
+      id: string;
+      label: string;
+    }
+  | {
+      type: "delete-semester";
+      id: string;
+      label: string;
+    }
+  | {
+      type: "activate-semester";
+      id: string;
+      label: string;
+      status: string;
+    }
+  | null;
+
 const SemesterManagementPage = () => {
   const [selectedYearId, setSelectedYearId] = useState<string | null>(null);
   const [openYear, setOpenYear] = useState(false);
   const [openSemester, setOpenSemester] = useState(false);
   const [selectedSemester, setSelectedSemester] = useState<any>(null);
   const [semesters, setSemesters] = useState<any[]>([]);
+  const [pendingAction, setPendingAction] = useState<PendingAction>(null);
 
-  const { data } = useGetYearsQuery();
+  const { data, refetch: refetchYears } = useGetYearsQuery();
   const years = data?.data ?? [];
 
   const selectedYear = useMemo(
@@ -30,11 +51,13 @@ const SemesterManagementPage = () => {
     [years, selectedYearId],
   );
 
-  const [deleteYear] = useDeleteYearMutation();
+  const [deleteYear, { isLoading: isDeletingYear }] = useDeleteYearMutation();
   const [getSemesters, { isFetching: isLoadingSemester }] =
     useLazyGetSemesterByYearQuery();
-  const [deleteSemester] = useDeleteSemesterMutation();
-  const [updateSemesterStatus] = useUpdateSemesterStatusMutation();
+  const [deleteSemester, { isLoading: isDeletingSemester }] =
+    useDeleteSemesterMutation();
+  const [updateSemesterStatus, { isLoading: isUpdatingSemesterStatus }] =
+    useUpdateSemesterStatusMutation();
 
   const loadSemesters = async (yearId: string) => {
     try {
@@ -45,29 +68,62 @@ const SemesterManagementPage = () => {
     }
   };
 
-  const deleteYearById = async (id: string) => {
-    if (confirm("Xác nhận xóa?")) {
-      await deleteYear(id).unwrap();
-      setSelectedYearId(null);
-      setSemesters([]);
+  const handleConfirmAction = async () => {
+    if (!pendingAction) return;
+
+    try {
+      if (pendingAction.type === "delete-year") {
+        await deleteYear(pendingAction.id).unwrap();
+        setSelectedYearId(null);
+        setSemesters([]);
+        refetchYears();
+      }
+
+      if (pendingAction.type === "delete-semester") {
+        if (!selectedYearId) return;
+        await deleteSemester(pendingAction.id).unwrap();
+        await loadSemesters(selectedYearId);
+      }
+
+      if (pendingAction.type === "activate-semester") {
+        if (!selectedYearId) return;
+        await updateSemesterStatus({
+          id: pendingAction.id,
+          status: pendingAction.status,
+        }).unwrap();
+        await loadSemesters(selectedYearId);
+      }
+    } finally {
+      setPendingAction(null);
     }
   };
 
-  const updateSemesterStatusById = async (id: string, status: string) => {
-    if (!selectedYearId) return;
-    if (confirm("Xác nhận cập nhật?")) {
-      await updateSemesterStatus({ id, status }).unwrap();
-      loadSemesters(selectedYearId);
-    }
-  };
+  const confirmLoading =
+    isDeletingYear || isDeletingSemester || isUpdatingSemesterStatus;
 
-  const deleteSemesterById = async (id: string) => {
-    if (!selectedYearId) return;
-    if (confirm("Xác nhận xóa?")) {
-      await deleteSemester(id).unwrap();
-      loadSemesters(selectedYearId);
-    }
-  };
+  const confirmTitle =
+    pendingAction?.type === "delete-year"
+      ? "Xác nhận xóa năm học"
+      : pendingAction?.type === "delete-semester"
+        ? "Xác nhận xóa học kỳ"
+        : pendingAction?.type === "activate-semester"
+          ? "Xác nhận kích hoạt học kỳ"
+          : "Xác nhận";
+
+  const confirmDescription =
+    pendingAction?.type === "delete-year"
+      ? `Bạn có chắc chắn muốn xóa năm học ${pendingAction.label}? Hành động này không thể hoàn tác.`
+      : pendingAction?.type === "delete-semester"
+        ? `Bạn có chắc chắn muốn xóa học kỳ ${pendingAction.label}?`
+        : pendingAction?.type === "activate-semester"
+          ? `Bạn có chắc chắn muốn đặt ${pendingAction.label} làm học kỳ hiện tại?`
+          : "";
+
+  const confirmType =
+    pendingAction?.type === "activate-semester" ? "info" : "danger";
+
+  const confirmText =
+    pendingAction?.type === "activate-semester" ? "Kích hoạt" : "Xóa";
 
   return (
     <main className="p-6 mx-auto font-inter space-y-5 bg-white dark:bg-gray-900 rounded-2xl border border-gray-200 dark:border-gray-700">
@@ -155,7 +211,13 @@ const SemesterManagementPage = () => {
                       icon={Trash2}
                       size="xs"
                       variant="soft-danger"
-                      onClick={() => deleteYearById(year.id)}
+                      onClick={() =>
+                        setPendingAction({
+                          type: "delete-year",
+                          id: year.id,
+                          label: year.name,
+                        })
+                      }
                     />
                   </span>
                 </li>
@@ -235,12 +297,25 @@ const SemesterManagementPage = () => {
                   <SemesterRow
                     key={s.id}
                     semester={s}
-                    onActivate={updateSemesterStatusById}
+                    onActivate={(id, status) =>
+                      setPendingAction({
+                        type: "activate-semester",
+                        id,
+                        status,
+                        label: s.name,
+                      })
+                    }
                     onEdit={() => {
                       setSelectedSemester(s);
                       setOpenSemester(true);
                     }}
-                    onDelete={() => deleteSemesterById(s.id)}
+                    onDelete={() =>
+                      setPendingAction({
+                        type: "delete-semester",
+                        id: s.id,
+                        label: s.name,
+                      })
+                    }
                   />
                 ))}
               </div>
@@ -253,6 +328,9 @@ const SemesterManagementPage = () => {
         open={openYear}
         onClose={() => setOpenYear(false)}
         initialData={selectedYear}
+        onSuccess={() => {
+          refetchYears();
+        }}
       />
       <SemesterForm
         open={openSemester}
@@ -260,6 +338,23 @@ const SemesterManagementPage = () => {
         initialData={selectedSemester}
         semesterId={selectedSemester?.id}
         yearId={selectedYear?.id}
+        onSuccess={() => {
+          if (selectedYearId) {
+            loadSemesters(selectedYearId);
+          }
+        }}
+      />
+
+      <ConfirmModal
+        open={Boolean(pendingAction)}
+        onClose={() => setPendingAction(null)}
+        onConfirm={handleConfirmAction}
+        type={confirmType as "danger" | "info"}
+        title={confirmTitle}
+        description={confirmDescription}
+        confirmText={confirmText}
+        cancelText="Hủy"
+        loading={confirmLoading}
       />
     </main>
   );

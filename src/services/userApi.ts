@@ -24,6 +24,16 @@ const MGR_URL = "/users/managers";
 
 export const userApi = api.injectEndpoints({
   endpoints: (builder) => ({
+    getUserAccount: builder.query<
+      ApiResponse<{ id: string; username: string }>,
+      void
+    >({
+      query: () => ({
+        url: "/users/account",
+        method: "GET",
+      }),
+      providesTags: ["User", "Auth"],
+    }),
     /* STUDENTS */
     // GET STUDENTS
     getStudents: builder.query<ApiResponse<StudentResponse[]>, void>({
@@ -50,6 +60,17 @@ export const userApi = api.injectEndpoints({
     >({
       query: (data) => ({
         url: `${STD_URL}`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Student"],
+    }),
+    addStudents: builder.mutation<
+      ApiResponse<StudentResponse[]>,
+      CreateStudentRequest[]
+    >({
+      query: (data) => ({
+        url: `${STD_URL}/bulk`,
         method: "POST",
         body: data,
       }),
@@ -121,6 +142,7 @@ export const userApi = api.injectEndpoints({
         url: `${LEC_URL}/search`,
         params: form,
       }),
+      providesTags: ["Lecturer"],
     }),
     // ADD LECTURER
     addLecturer: builder.mutation<
@@ -129,6 +151,17 @@ export const userApi = api.injectEndpoints({
     >({
       query: (data) => ({
         url: `${LEC_URL}`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Lecturer"],
+    }),
+    addLecturers: builder.mutation<
+      ApiResponse<LecturerResponse[]>,
+      AddLecturerRequest[]
+    >({
+      query: (data) => ({
+        url: `${LEC_URL}/bulk`,
         method: "POST",
         body: data,
       }),
@@ -221,10 +254,12 @@ export const userApi = api.injectEndpoints({
 });
 
 export const {
+  useGetUserAccountQuery,
   /* STUDENT */
   useGetStudentsQuery,
   useSearchStudentsQuery,
   useAddStudentMutation,
+  useAddStudentsMutation,
   useUpdateStudentMutation,
   useDeleteStudentMutation,
   useGetStudentProfileQuery,
@@ -234,6 +269,7 @@ export const {
   useGetLecturersQuery,
   useSearchLecturersQuery,
   useAddLecturerMutation,
+  useAddLecturersMutation,
   useUpdateLecturerMutation,
   useDeleteLecturerMutation,
   useGetLecturerProfileQuery,

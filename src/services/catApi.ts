@@ -27,6 +27,7 @@ export const catApi = api.injectEndpoints({
       query: () => ({
         url: `${COR_URL}`,
       }),
+      providesTags: ["Course"],
     }),
     createCourse: builder.mutation<ApiResponse<CourseProps>, any>({
       query: (data) => ({
@@ -34,6 +35,7 @@ export const catApi = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Course"],
     }),
     updateCourse: builder.mutation<ApiResponse<CourseProps>, any>({
       query: ({ id, data }) => ({
@@ -41,18 +43,21 @@ export const catApi = api.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Course"],
     }),
     deleteCourse: builder.mutation<ApiResponse<CourseProps>, any>({
       query: (id) => ({
         url: `${COR_URL}/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Course"],
     }),
     /* ROLES */
     getRoles: builder.query<ApiResponse<RoleResponse[]>, void>({
       query: () => ({
         url: `${ROLE_URL}`,
       }),
+      providesTags: ["Role"],
     }),
     createRole: builder.mutation<
       ApiResponse<RoleResponse[]>,
@@ -63,6 +68,7 @@ export const catApi = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Role", "Council"],
     }),
     updateRole: builder.mutation<
       ApiResponse<RoleResponse[]>,
@@ -73,12 +79,14 @@ export const catApi = api.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Role", "Council"],
     }),
     deleteRole: builder.mutation<ApiResponse<void>, string>({
       query: (id) => ({
         url: `${ROLE_URL}/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Role", "Council"],
     }),
   }),
 });

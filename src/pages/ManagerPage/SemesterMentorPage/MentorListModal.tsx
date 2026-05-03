@@ -66,7 +66,9 @@ const MentorListModal = ({
   return (
     <Modal open={open} onClose={onClose} width="max-w-6xl">
       {/* HEADER */}
-      <h1 className="text-lg font-semibold mb-4">Danh sách giảng viên</h1>
+      <h1 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100">
+        Danh sách giảng viên
+      </h1>
 
       {/* SEARCH */}
       <div className="grid grid-cols-3 gap-4 mb-4">
@@ -77,7 +79,7 @@ const MentorListModal = ({
           onChange={(e) =>
             setSearch((prev) => ({ ...prev, name: e.target.value }))
           }
-          className="border px-3 py-2 rounded"
+          className="border border-gray-300 dark:border-gray-700 px-3 py-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
 
         <input
@@ -87,7 +89,7 @@ const MentorListModal = ({
           onChange={(e) =>
             setSearch((prev) => ({ ...prev, code: e.target.value }))
           }
-          className="border px-3 py-2 rounded"
+          className="border border-gray-300 dark:border-gray-700 px-3 py-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
 
         <input
@@ -97,14 +99,14 @@ const MentorListModal = ({
           onChange={(e) =>
             setSearch((prev) => ({ ...prev, email: e.target.value }))
           }
-          className="border px-3 py-2 rounded"
+          className="border border-gray-300 dark:border-gray-700 px-3 py-2 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
       </div>
 
       {/* TABLE */}
-      <div className="border border-gray-200 bg-white">
+      <div className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 rounded-lg overflow-hidden">
         {/* HEADER */}
-        <div className="grid grid-cols-6 gap-4 border-b px-4 py-3 text-xs font-semibold uppercase bg-gray-50">
+        <div className="grid grid-cols-6 gap-4 border-b border-gray-200 dark:border-gray-700 px-4 py-3 text-xs font-semibold uppercase bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300">
           <div className="col-span-2">Giảng viên</div>
           <div>Mã CB</div>
           <div>Ngày sinh</div>
@@ -115,9 +117,13 @@ const MentorListModal = ({
 
         {/* BODY */}
         {isLoading ? (
-          <div className="p-4 text-center">Loading...</div>
+          <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+            Loading...
+          </div>
         ) : mentors.length === 0 ? (
-          <div className="p-4 text-center">Không có giảng viên</div>
+          <div className="p-4 text-center text-gray-500 dark:text-gray-400">
+            Không có giảng viên
+          </div>
         ) : (
           mentors.map((mentor) => (
             <MentorRow
@@ -131,11 +137,11 @@ const MentorListModal = ({
       </div>
 
       {/* PAGINATION */}
-      <div className="flex items-center justify-between mt-4">
+      <div className="flex items-center justify-between mt-4 text-gray-700 dark:text-gray-200">
         <button
           onClick={handlePrev}
           disabled={page === 0}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          className="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           Previous
         </button>
@@ -147,7 +153,7 @@ const MentorListModal = ({
         <button
           onClick={handleNext}
           disabled={page + 1 >= totalPages}
-          className="px-3 py-1 border rounded disabled:opacity-50"
+          className="px-3 py-1 border border-gray-300 dark:border-gray-700 rounded disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-gray-800"
         >
           Next
         </button>

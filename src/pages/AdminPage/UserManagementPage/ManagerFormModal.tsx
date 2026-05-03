@@ -86,17 +86,17 @@ const ManagerFormModal = ({ open, manager, onClose }: Props) => {
 
   return (
     <Modal open={open} onClose={onClose} width="max-w-2xl">
-      <div className="bg-white rounded-xl p-2 space-y-6">
+      <div className="bg-white dark:bg-gray-900 rounded-xl p-2 space-y-6">
         {/* HEADER */}
         <div className="flex gap-4">
-          <div className="bg-blue-100 text-blue-600 rounded-xl p-3 flex items-center justify-center">
+          <div className="bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 rounded-xl p-3 flex items-center justify-center">
             <UserRoundCog size={20} />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
               {isEdit ? "Chỉnh sửa người quản lý" : "Thêm người quản lý"}
             </h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {isEdit
                 ? "Cập nhật thông tin tổ chức"
                 : "Tạo mới tài khoản quản lý"}

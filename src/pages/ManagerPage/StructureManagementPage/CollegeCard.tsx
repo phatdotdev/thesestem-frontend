@@ -6,6 +6,9 @@ import FacultyForm from "./FacultyForm";
 import { useState } from "react";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import CollegeForm from "./CollegeForm";
+import { useAppDispatch } from "../../../app/hook";
+import { addToast } from "../../../features/notification/toastSlice";
+import ConfirmModal from "../../../components/UI/ConfirmModal";
 
 export const CollegeCard = ({
   college,
@@ -16,23 +19,31 @@ export const CollegeCard = ({
   open: boolean;
   setOpen: (open: boolean) => void;
 }) => {
+  const dispatch = useAppDispatch();
   const [deleteCollege, { isLoading: isDeleting }] = useDeleteCollegeMutation();
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
   const deleteCollegeById = async () => {
-    await deleteCollege(college.id).unwrap();
+    try {
+      await deleteCollege(college.id).unwrap();
+      setOpenDeleteModal(false);
+      dispatch(addToast({ type: "success", message: "Xóa trường thành công" }));
+    } catch (error) {
+      console.log(error);
+      dispatch(addToast({ type: "error", message: "Không thể xóa trường" }));
+    }
   };
 
   const [openAddFacultyForm, setOpenAddFacultyForm] = useState(false);
   const [openUpdateCollegeForm, setOpenUpdateCollegeForm] = useState(false);
 
   return (
-    <div className="flex items-center justify-between bg-white dark:bg-gray-800 px-4 rounded-xl border border-gray-300 dark:border-gray-700 hover:border-gray-400 dark:hover:border-gray-600 hover:shadow-sm transition-all duration-200">
-      {/* LEFT */}
-      <div className="flex gap-4 items-center py-5">
-        <div className="bg-blue-100 dark:bg-blue-900/30 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+    <div className="flex items-center justify-between rounded-xl border border-gray-200 bg-white px-4 transition-all duration-200 hover:border-gray-300 hover:shadow-sm dark:border-slate-700 dark:bg-slate-900 dark:hover:border-slate-600">
+      <div className="flex items-center gap-4 py-5">
+        <div className="rounded-lg border border-gray-200 bg-gray-100 p-3 dark:border-gray-700 dark:bg-gray-800">
           <HiOutlineOfficeBuilding
             size={28}
-            className="text-blue-600 dark:text-blue-400"
+            className="text-gray-600 dark:text-gray-300"
           />
         </div>
 
@@ -41,19 +52,17 @@ export const CollegeCard = ({
             {college.name}
           </h2>
 
-          <p className="text-md text-gray-500 dark:text-gray-400 font-bold">
-            {college.code}
-          </p>
+          <div className="inline-flex rounded-full border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs font-semibold text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            {college.code || "Chưa có mã"}
+          </div>
         </div>
       </div>
 
-      {/* ACTIONS */}
       <div className="flex gap-2">
         <Button
           icon={Plus}
           size="sm"
           variant="outline"
-          className="hover:bg-green-50 dark:hover:bg-green-900/30 dark:hover:text-green-400"
           onClick={() => setOpenAddFacultyForm(true)}
         />
 
@@ -61,17 +70,15 @@ export const CollegeCard = ({
           icon={Edit}
           size="sm"
           variant="outline"
-          className="hover:bg-blue-50 dark:hover:bg-blue-900/30 dark:hover:text-blue-400"
           onClick={() => setOpenUpdateCollegeForm(true)}
         />
 
         <Button
           icon={Trash2}
           size="sm"
-          variant="outline"
+          variant="outline-danger"
           loading={isDeleting}
-          className="hover:bg-red-50 dark:hover:bg-red-900/30 dark:hover:text-red-400"
-          onClick={deleteCollegeById}
+          onClick={() => setOpenDeleteModal(true)}
         />
 
         <Button
@@ -96,6 +103,17 @@ export const CollegeCard = ({
         initialData={null}
         open={openAddFacultyForm}
         onClose={() => setOpenAddFacultyForm(false)}
+      />
+
+      <ConfirmModal
+        open={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={deleteCollegeById}
+        title="Xóa trường?"
+        description={`Bạn có chắc muốn xóa trường ${college.name}? Hành động này không thể hoàn tác.`}
+        confirmText="Xác nhận xóa"
+        type="danger"
+        loading={isDeleting}
       />
     </div>
   );

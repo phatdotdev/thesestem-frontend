@@ -92,7 +92,7 @@ const StaffProfilePage = () => {
   if (isLoading) return <Loader />;
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-10">
+    <div className="mx-auto max-w-7xl space-y-6 pb-10 sm:space-y-8">
       {/* ===== Staff Info ===== */}
       <SectionCard title="Thông tin cán bộ" icon={User}>
         <div className="flex flex-col md:flex-row gap-8">
@@ -112,7 +112,7 @@ const StaffProfilePage = () => {
               JPG, PNG tối đa 5MB
             </p>
 
-            <div className="flex gap-4">
+            <div className="flex flex-wrap justify-center gap-3 sm:justify-end sm:gap-4">
               {!editingAvatar && (
                 <Button
                   icon={Edit}
@@ -218,7 +218,7 @@ const StaffProfilePage = () => {
           </div>
         </div>
 
-        <div className="flex justify-end gap-4">
+        <div className="flex flex-wrap justify-center gap-3 sm:justify-end sm:gap-4">
           {!editing && (
             <Button
               icon={Edit}

@@ -1,35 +1,54 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
+import type { NotificationResponse } from "../../types/communication";
 
-export type ToastType = "success" | "error" | "warning" | "info";
+interface NotificationState {
+  notifications: NotificationResponse[];
 
-export interface Toast {
-  id?: string;
-  message: string;
-  type: ToastType;
-  timeoutSet?: number;
+  unreadCount: number;
 }
 
-interface ToastState {
-  toasts: Toast[];
-}
-
-const initialState: ToastState = {
-  toasts: [],
+const initialState: NotificationState = {
+  notifications: [],
+  unreadCount: 0,
 };
 
-const ToastSlice = createSlice({
-  name: "Toast",
+const notificationSlice = createSlice({
+  name: "notification",
   initialState,
   reducers: {
-    addToast: (state, action: PayloadAction<Toast>) => {
-      state.toasts.push(action.payload);
+    addNotification: (state, action: PayloadAction<NotificationResponse>) => {
+      state.notifications.unshift(action.payload);
+
+      state.unreadCount += 1;
     },
-    removeToast: (state, action: PayloadAction<string>) => {
-      state.toasts = state.toasts.filter((n) => n.id !== action.payload);
+
+    setNotifications: (
+      state,
+      action: PayloadAction<NotificationResponse[]>,
+    ) => {
+      state.notifications = action.payload;
+      state.unreadCount = action.payload.filter((n) => !n.read).length;
+    },
+    markAsRead: (state, action: PayloadAction<string>) => {
+      const notification = state.notifications.find(
+        (n) => n.id === action.payload,
+      );
+      if (notification && !notification.read) {
+        notification.read = true;
+        state.unreadCount = Math.max(state.unreadCount - 1, 0);
+      }
+    },
+    markAllRead: (state) => {
+      state.notifications = state.notifications.map((n) => ({
+        ...n,
+        read: true,
+      }));
+      state.unreadCount = 0;
     },
   },
 });
 
-export const { addToast, removeToast } = ToastSlice.actions;
+export const { addNotification, setNotifications, markAllRead, markAsRead } =
+  notificationSlice.actions;
 
-export default ToastSlice.reducer;
+export default notificationSlice.reducer;

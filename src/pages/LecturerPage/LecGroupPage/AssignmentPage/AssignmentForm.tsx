@@ -11,6 +11,8 @@ import {
   useUpdateAssignmentMutation,
 } from "../../../../services/groupApi";
 import { useParams } from "react-router-dom";
+import { addToast } from "../../../../features/notification/toastSlice";
+import { useAppDispatch } from "../../../../app/hook";
 
 const AssignmentForm = ({
   open,
@@ -34,10 +36,20 @@ const AssignmentForm = ({
       setDeadline(initialData.deadline);
     }
   }, [initialData]);
+
   const [createAssignment] = useCreateAssignmentMutation();
   const [updateAssignment] = useUpdateAssignmentMutation();
-
+  const dispatch = useAppDispatch();
   const handleSubmit = async () => {
+    if (!name || !deadline) {
+      dispatch(
+        addToast({
+          message: "Vui lòng điền đầy đủ thông tin",
+          type: "error",
+        }),
+      );
+      return;
+    }
     if (initialData) {
       await updateAssignment({
         groupId: id as string,
@@ -52,19 +64,28 @@ const AssignmentForm = ({
     }
     onClose();
   };
+
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="p-2 space-y-6">
+      <div className="p-2 space-y-6 text-gray-800 dark:text-gray-100">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-blue-100 text-blue-600">
+          <div
+            className="
+              p-2 rounded-xl
+              bg-blue-100 text-blue-600
+              dark:bg-blue-900/30 dark:text-blue-400
+            "
+          >
             <MdOutlineAssignment size={20} />
           </div>
+
           <div>
             <h1 className="text-lg font-semibold">
               {initialData ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}
             </h1>
-            <p className="text-sm text-gray-500">
+
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               {initialData
                 ? "Cập nhật thông tin bài tập"
                 : "Nhập thông tin để tạo bài tập mới"}
@@ -94,18 +115,19 @@ const AssignmentForm = ({
           <Input
             label="Thời gian hết hạn"
             iconLeft={MdCalendarMonth}
-            placeholder="Nhập tên nhóm..."
+            placeholder="Nhập thời gian hết hạn..."
             value={deadline}
             type="datetime-local"
             onChange={(e) => setDeadline(e.target.value)}
           />
         </div>
 
-        {/* Divider */}
+        {/* Footer */}
         <div className="pt-4 flex justify-end gap-3">
           <Button label="Hủy" variant="outline" onClick={onClose} />
+
           <Button
-            label={initialData ? "Cập nhật" : "Tạo nhóm"}
+            label={initialData ? "Cập nhật" : "Tạo bài tập"}
             onClick={handleSubmit}
           />
         </div>

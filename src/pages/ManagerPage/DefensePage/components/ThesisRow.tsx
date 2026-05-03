@@ -1,14 +1,15 @@
-import { getColor } from "../../../../utils/getColor";
-import { getInitials } from "../../../../utils/getInitials";
+import AvatarInitial from "../../../../components/UI/AvatarInitial";
 import { truncateWords } from "../../../../utils/truncateWord";
 
 const ThesisRow = ({
   added,
+  isAssigned,
   onClick,
   thesis,
   selected,
 }: {
   added: boolean;
+  isAssigned?: boolean;
   thesis: any;
   selected?: boolean;
   onClick?: () => void;
@@ -23,6 +24,48 @@ const ThesisRow = ({
     "Chưa cập nhật";
 
   const isDisabled = added;
+
+  const getStatusLabel = (status?: string) => {
+    if (!status) return "Chưa cập nhật";
+
+    const normalized = status.toUpperCase();
+
+    if (normalized === "APPROVED") return "Đã duyệt";
+    if (normalized === "PENDING") return "Chờ duyệt";
+    if (normalized === "REJECTED") return "Từ chối";
+    if (normalized === "IN_PROGRESS") return "Đang thực hiện";
+    if (normalized === "COMPLETED") return "Hoàn thành";
+    if (normalized === "DRAFT") return "Bản nháp";
+
+    return status
+      .toLowerCase()
+      .split("_")
+      .map((s: string) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join(" ");
+  };
+
+  const getStatusClass = (status?: string) => {
+    const normalized = (status ?? "").toUpperCase();
+
+    if (normalized === "APPROVED" || normalized === "COMPLETED") {
+      return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    }
+
+    if (normalized === "PENDING" || normalized === "IN_PROGRESS") {
+      return "bg-amber-50 text-amber-700 border-amber-200";
+    }
+
+    if (normalized === "REJECTED") {
+      return "bg-red-50 text-red-700 border-red-200";
+    }
+
+    return "bg-gray-100 text-gray-600 border-gray-200";
+  };
+
+  const thesisStatusLabel = getStatusLabel(thesis?.status);
+  const progressPercent = Number.isFinite(thesis?.progressPercent)
+    ? thesis.progressPercent
+    : 0;
 
   return (
     <div
@@ -64,12 +107,29 @@ const ThesisRow = ({
           )}
         </p>
 
-        {/* BADGE */}
-        {isDisabled && (
-          <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-200 text-gray-600 border">
-            Đã phân công
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
+          {isAssigned && (
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200 font-semibold">
+              Đã phân công
+            </span>
+          )}
+          <span
+            className={`text-[10px] px-2 py-0.5 rounded-full border font-semibold ${getStatusClass(
+              thesis?.status,
+            )}`}
+          >
+            {thesisStatusLabel}
           </span>
-        )}
+        </div>
+      </div>
+
+      <div className="flex items-center flex-wrap gap-2 mt-2">
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+          Tiến độ: {progressPercent}%
+        </span>
+        <span className="text-[10px] px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+          Mức truy cập: {thesis?.accessLevel ?? "—"}
+        </span>
       </div>
 
       {/* INFO */}
@@ -81,17 +141,11 @@ const ThesisRow = ({
           </p>
 
           <div className="flex items-center gap-2">
-            <div
-              className={`
-                w-8 h-8 rounded-full flex items-center justify-center
-                text-xs font-semibold text-white
-                ${getColor(student?.fullName)}
-                shadow-sm
-                ${isDisabled ? "grayscale" : ""}
-              `}
-            >
-              {getInitials(student?.fullName)}
-            </div>
+            <AvatarInitial
+              fullName={student?.fullName}
+              size={32}
+              className={isDisabled ? "grayscale" : ""}
+            />
 
             <div className="min-w-0">
               <p
@@ -118,17 +172,11 @@ const ThesisRow = ({
           </p>
 
           <div className="flex items-center gap-2">
-            <div
-              className={`
-                w-8 h-8 rounded-full flex items-center justify-center
-                text-xs font-semibold text-white
-                ${getColor(mentor?.fullName)}
-                shadow-sm
-                ${isDisabled ? "grayscale" : ""}
-              `}
-            >
-              {getInitials(mentor?.fullName)}
-            </div>
+            <AvatarInitial
+              fullName={mentor?.fullName}
+              size={32}
+              className={isDisabled ? "grayscale" : ""}
+            />
 
             <div className="min-w-0">
               <p

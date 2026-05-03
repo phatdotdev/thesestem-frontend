@@ -22,6 +22,8 @@ interface OrgUnitFormProps {
   };
   onClose: () => void;
   onSuccess: () => void;
+  onError?: () => void;
+  onValidationError?: (message: string) => void;
 }
 
 const OrgUnitForm = ({
@@ -29,16 +31,21 @@ const OrgUnitForm = ({
   initialData,
   onClose,
   onSuccess,
+  onError,
+  onValidationError,
 }: OrgUnitFormProps) => {
-  const [addCollege] = useAddCollegeMutation();
-  const [addFaculty] = useAddFacultyMutation();
-  const [addDepartment] = useAddDepartmentMutation();
+  const [addCollege, { isLoading: isAddingCollege }] = useAddCollegeMutation();
+  const [addFaculty, { isLoading: isAddingFaculty }] = useAddFacultyMutation();
+  const [addDepartment, { isLoading: isAddingDepartment }] =
+    useAddDepartmentMutation();
 
   const [type, setType] = useState<OrgUnitType>("COLLEGE");
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [description, setDescription] = useState("");
   const [parentId, setParentId] = useState("");
+
+  const isSubmitting = isAddingCollege || isAddingFaculty || isAddingDepartment;
 
   useEffect(() => {
     if (initialData) {
@@ -55,7 +62,10 @@ const OrgUnitForm = ({
     "w-full rounded-lg border border-gray-300 dark:border-gray-700 bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500";
 
   const handleSubmit = async () => {
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      onValidationError?.("Vui lòng nhập tên đơn vị");
+      return;
+    }
 
     try {
       if (type === "COLLEGE") {
@@ -70,26 +80,36 @@ const OrgUnitForm = ({
         await addDepartment({ name, description, code }).unwrap();
       }
 
+      setName("");
+      setCode("");
+      setDescription("");
+      setType("COLLEGE");
+      setParentId("");
       onSuccess();
     } catch (err: any) {
       console.error(err);
+      onError?.();
     }
   };
 
   return (
     <Modal open={open} onClose={onClose}>
-      {/* Header */}
-      <div className="flex items-center gap-2 border-gray-200 dark:border-gray-800 px-2 py-2">
-        <Building2 size={20} className="text-blue-600" />
-        <h2 className="text-lg font-semibold">
-          {initialData ? "Cập nhật đơn vị" : "Thêm đơn vị"}
-        </h2>
+      <div className="mb-4 flex items-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/60">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-gray-700 shadow-sm dark:bg-slate-900 dark:text-gray-300">
+          <Building2 size={20} />
+        </div>
+        <div>
+          <p className="text-xs uppercase tracking-wide text-gray-600 dark:text-gray-400">
+            Quản lý cơ cấu
+          </p>
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            {initialData ? "Cập nhật đơn vị" : "Thêm đơn vị"}
+          </h2>
+        </div>
       </div>
 
-      {/* Body */}
-      <div className="space-y-5 px-6 py-5">
-        {/* Type */}
-        <div>
+      <div className="space-y-5 px-1 py-1">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/60">
           <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
             Loại đơn vị
           </label>
@@ -105,8 +125,7 @@ const OrgUnitForm = ({
           </select>
         </div>
 
-        {/* Name + Code */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
               Tên đơn vị
@@ -134,16 +153,15 @@ const OrgUnitForm = ({
           </div>
         </div>
 
-        {/* Description */}
         <Textarea
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           label="Mô tả"
-          placeholder="Mô tả đơn vị của bạn"
+          placeholder="Mô tả ngắn về đơn vị"
           rows={4}
+          containerClassName="rounded-lg"
         />
 
-        {/* Parent */}
         {type !== "COLLEGE" && (
           <div>
             <label className="mb-1 block text-sm font-medium text-gray-600 dark:text-gray-300">
@@ -154,19 +172,23 @@ const OrgUnitForm = ({
               value={parentId}
               onChange={(e) => setParentId(e.target.value)}
               className={inputClass}
+              disabled
             >
-              <option value="">-- Chọn đơn vị --</option>
+              <option value="">
+                Thêm từ nút + trong cây để chọn đơn vị cha
+              </option>
             </select>
           </div>
         )}
       </div>
 
-      {/* Footer */}
-      <div className="flex justify-end gap-3 border-gray-200 dark:border-gray-800 px-6 py-4">
-        <Button label="Hủy" variant="secondary" onClick={onClose} />
+      <div className="mt-5 flex justify-end gap-3 border-t border-gray-200 px-1 pt-4 dark:border-gray-800">
+        <Button label="Hủy" variant="secondary" size="sm" onClick={onClose} />
         <Button
           label={initialData ? "Cập nhật" : "Tạo mới"}
           onClick={handleSubmit}
+          loading={isSubmitting}
+          size="sm"
         />
       </div>
     </Modal>

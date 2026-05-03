@@ -22,7 +22,7 @@ import type {
 } from "../../../types/lecturer";
 
 import { useAppDispatch } from "../../../app/hook";
-import { addToast } from "../../../features/notification/notificationSlice";
+import { addToast } from "../../../features/notification/toastSlice";
 
 import {
   User,

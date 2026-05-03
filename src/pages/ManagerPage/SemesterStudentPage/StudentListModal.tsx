@@ -67,7 +67,9 @@ const StudentListModal = ({
     <Modal open={open} onClose={onClose} width="max-w-6xl">
       {/* HEADER */}
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold">Danh sách sinh viên</h1>
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          Danh sách sinh viên
+        </h1>
       </div>
 
       {/* SEARCH */}
@@ -79,7 +81,7 @@ const StudentListModal = ({
           onChange={(e) =>
             setSearch((prev) => ({ ...prev, name: e.target.value }))
           }
-          className="border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 dark:border-gray-700 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
 
         <input
@@ -89,7 +91,7 @@ const StudentListModal = ({
           onChange={(e) =>
             setSearch((prev) => ({ ...prev, code: e.target.value }))
           }
-          className="border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 dark:border-gray-700 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
 
         <input
@@ -99,14 +101,14 @@ const StudentListModal = ({
           onChange={(e) =>
             setSearch((prev) => ({ ...prev, email: e.target.value }))
           }
-          className="border border-gray-300 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="border border-gray-300 dark:border-gray-700 px-3 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
         />
       </div>
 
       {/* TABLE */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
+      <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-900">
         {/* HEADER */}
-        <div className="grid grid-cols-9 gap-4 px-4 py-3 text-xs font-semibold uppercase bg-gray-50 border-b">
+        <div className="grid grid-cols-9 gap-4 px-4 py-3 text-xs font-semibold uppercase bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300">
           <div className="col-span-2">Sinh viên</div>
           <div>Mã SV</div>
           <div>Ngày sinh</div>
@@ -119,11 +121,11 @@ const StudentListModal = ({
 
         {/* BODY */}
         {isLoading ? (
-          <div className="p-6 text-center text-gray-500">
+          <div className="p-6 text-center text-gray-500 dark:text-gray-400">
             Đang tải dữ liệu...
           </div>
         ) : students.length === 0 ? (
-          <div className="p-6 text-center text-gray-500">
+          <div className="p-6 text-center text-gray-500 dark:text-gray-400">
             Không có sinh viên
           </div>
         ) : (
@@ -143,12 +145,12 @@ const StudentListModal = ({
         <button
           onClick={handlePrev}
           disabled={page === 0}
-          className="px-3 py-1.5 border rounded-md disabled:opacity-40 hover:bg-gray-100"
+          className="px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-md disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200"
         >
           ← Previous
         </button>
 
-        <span className="text-gray-600">
+        <span className="text-gray-600 dark:text-gray-400">
           Trang <b>{page + 1}</b> / {totalPages || 1} • Tổng:{" "}
           <b>{data?.data.totalElements ?? 0}</b>
         </span>
@@ -156,7 +158,7 @@ const StudentListModal = ({
         <button
           onClick={handleNext}
           disabled={page + 1 >= totalPages}
-          className="px-3 py-1.5 border rounded-md disabled:opacity-40 hover:bg-gray-100"
+          className="px-3 py-1.5 border border-gray-300 dark:border-gray-700 rounded-md disabled:opacity-40 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-200"
         >
           Next →
         </button>

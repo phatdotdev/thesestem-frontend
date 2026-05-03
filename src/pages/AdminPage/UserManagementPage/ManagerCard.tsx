@@ -10,10 +10,10 @@ type Props = {
 
 const ManagerCard = ({ manager, onSelect }: Props) => {
   return (
-    <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition">
+    <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 shadow-sm hover:shadow-md transition">
       <div className="flex gap-4">
         {/* LOGO */}
-        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex items-center justify-center">
+        <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
           <img
             src={manager.logoUrl || defaultLogo}
             alt={manager.name}
@@ -23,13 +23,15 @@ const ManagerCard = ({ manager, onSelect }: Props) => {
 
         {/* INFO */}
         <div className="flex-1 space-y-1">
-          <h3 className="font-semibold text-gray-800 text-lg">
+          <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-lg">
             {manager.name}
           </h3>
 
-          <p className="text-sm text-gray-500">Mã tổ chức: {manager.code}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Mã tổ chức: {manager.code}
+          </p>
 
-          <div className="mt-2 space-y-1 text-sm text-gray-600">
+          <div className="mt-2 space-y-1 text-sm text-gray-600 dark:text-gray-300">
             <div className="flex items-center gap-2">
               <Mail size={14} />
               {manager.email}

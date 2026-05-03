@@ -1,7 +1,8 @@
 import Modal from "../../../components/UI/Modal";
 import Button from "../../../components/UI/Button";
 import { useUpdateRegisterRequestStatusMutation } from "../../../services/semApi";
-import { useState } from "react";
+import { AlertTriangle, CheckCircle2, XCircle } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { RegisterResposne } from "../../../types/register";
 import Badge from "../../../components/UI/Badge";
 import Textarea from "../../../components/UI/TextArea";
@@ -25,6 +26,13 @@ const ConfirmStatusChangeModal = ({
   const [error, setError] = useState<string | null>(null);
   const [response, setResponse] = useState("");
 
+  useEffect(() => {
+    if (open) {
+      setError(null);
+      setResponse("");
+    }
+  }, [open, register?.id, status]);
+
   if (!register) return null;
 
   const handleConfirm = async () => {
@@ -38,58 +46,101 @@ const ConfirmStatusChangeModal = ({
 
       onClose();
     } catch (err: any) {
-      console.log(error);
       setError(err?.data?.message || "Có lỗi xảy ra");
     }
   };
 
-  const getActionText = () => {
-    switch (status) {
-      case "ACCEPTED":
-        return <Badge label="chấp nhận" variant="success" size="sm" />;
-      case "REJECTED":
-        return <Badge label="từ chối" variant="danger" size="sm" />;
-      case "CANCELLED":
-        return "hủy đăng ký";
-      default:
-        return "cập nhật";
-    }
-  };
+  const statusMeta =
+    status === "ACCEPTED"
+      ? {
+          title: "Chấp nhận đăng ký",
+          badgeVariant: "success" as const,
+          badgeLabel: "Chấp nhận",
+          icon: CheckCircle2,
+          iconTone:
+            "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-300",
+          confirmVariant: "success" as const,
+          confirmLabel: isLoading ? "Đang chấp nhận..." : "Xác nhận chấp nhận",
+        }
+      : {
+          title: "Từ chối đăng ký",
+          badgeVariant: "danger" as const,
+          badgeLabel: "Từ chối",
+          icon: XCircle,
+          iconTone:
+            "bg-red-100 text-red-600 dark:bg-red-950/40 dark:text-red-300",
+          confirmVariant: "danger" as const,
+          confirmLabel: isLoading ? "Đang từ chối..." : "Xác nhận từ chối",
+        };
+
+  const StatusIcon = statusMeta.icon;
 
   return (
-    <Modal open={open} onClose={onClose}>
-      <div className="space-y-4">
-        {/* Header */}
-        <h2 className="text-lg font-semibold text-gray-800">
-          Xác nhận thao tác
-        </h2>
+    <Modal open={open} onClose={onClose} width="max-w-lg">
+      <div className="space-y-5 p-1">
+        <div className="flex items-start gap-4">
+          <div className={`rounded-full p-3 ${statusMeta.iconTone}`}>
+            <StatusIcon size={22} />
+          </div>
 
-        {/* Content */}
-        <p className="text-sm text-gray-600">
-          Bạn có chắc muốn <b>{getActionText()}</b> đăng ký sinh viên
-          <b>{register.student.fullName}</b> không?
-        </p>
+          <div className="space-y-2">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              {statusMeta.title}
+            </h2>
+
+            <p className="text-sm text-gray-600 dark:text-gray-300">
+              Bạn có chắc muốn
+              <span className="mx-2 inline-flex align-middle">
+                <Badge
+                  label={statusMeta.badgeLabel}
+                  variant={statusMeta.badgeVariant}
+                  size="sm"
+                />
+              </span>
+              đăng ký của sinh viên
+              <span className="ml-1 font-semibold text-blue-600 dark:text-blue-300">
+                {register.student.fullName}
+              </span>
+              ?
+            </p>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-700 dark:border-amber-900 dark:bg-amber-950/30 dark:text-amber-300">
+          <div className="flex items-start gap-2">
+            <AlertTriangle size={16} className="mt-0.5 shrink-0" />
+            <p>Hành động này không thể hoàn tác.</p>
+          </div>
+        </div>
 
         {error && (
-          <div className="text-sm text-red-500 bg-red-50 p-2 rounded">
+          <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 p-2 rounded-md border border-red-200 dark:border-red-700">
             {error}
           </div>
         )}
 
         <Textarea
-          label="Phản hồi"
+          label="Phản hồi cho sinh viên"
           value={response}
           onChange={(e) => setResponse(e.target.value)}
           rows={3}
-          placeholder="Nhập phản hồi của bạn"
+          placeholder="Nhập lý do hoặc ghi chú để sinh viên nắm rõ"
+          disabled={isLoading}
+          className="dark:bg-gray-800 dark:text-gray-100 dark:border-gray-700"
         />
-        <Badge label="Hành động này không thể hoàn tác" variant="danger" />
-        {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4">
-          <Button label="Hủy" variant="outline" onClick={onClose} />
+
+        <div className="flex justify-end gap-3 pt-2">
+          <Button
+            label="Hủy"
+            variant="outline"
+            onClick={onClose}
+            disabled={isLoading}
+            className="dark:border-gray-700 dark:text-gray-200"
+          />
 
           <Button
-            label="Xác nhận"
+            label={statusMeta.confirmLabel}
+            variant={statusMeta.confirmVariant}
             loading={isLoading}
             onClick={handleConfirm}
           />

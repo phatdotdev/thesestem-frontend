@@ -2,7 +2,7 @@ import { useAppDispatch } from "../../../app/hook";
 import Badge from "../../../components/UI/Badge";
 import Button from "../../../components/UI/Button";
 import Modal from "../../../components/UI/Modal";
-import { addToast } from "../../../features/notification/notificationSlice";
+import { addToast } from "../../../features/notification/toastSlice";
 import { useDeleteProgramMutation } from "../../../services/orgApi";
 import type { ProgramResponse } from "../../../types/organization";
 

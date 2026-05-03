@@ -9,65 +9,80 @@ interface GroupCardProps {
 }
 
 const GroupCard = ({ group, onView }: GroupCardProps) => {
+  const studentCount = group.students?.length || 0;
+
   return (
     <div
       className="
       group
       bg-white dark:bg-gray-900
       border border-gray-200 dark:border-gray-700
-      rounded-2xl overflow-hidden
-      shadow-sm hover:shadow-lg
+      rounded-3xl overflow-hidden
+      shadow-sm hover:shadow-xl
       transition-all duration-300
-      hover:-translate-y-0.5
+      hover:-translate-y-1
       "
     >
       {/* HEADER */}
       <div
         className="
-        bg-gradient-to-r 
-        from-slate-100 to-gray-50
-        dark:from-gray-800 dark:to-gray-900
-        px-5 py-4 flex justify-between items-start
+        bg-gradient-to-br 
+        from-slate-50 via-white to-gray-50
+        dark:from-gray-800 dark:via-gray-900 dark:to-gray-900
+        px-5 py-4 flex justify-between items-start gap-3
         "
       >
-        <div className="flex gap-3 items-start">
+        <div className="flex gap-3 items-start min-w-0">
           <div
             className="
-            h-9 w-9 rounded-lg 
-            bg-white dark:bg-gray-800
-            border border-gray-200 dark:border-gray-700
+            h-11 w-11 rounded-2xl 
+            bg-sky-50 dark:bg-sky-950/30
+            border border-sky-100 dark:border-sky-900/50
             flex items-center justify-center
-            text-gray-600 dark:text-gray-300
+            text-sky-600 dark:text-sky-300
             "
           >
-            <Users size={16} />
+            <Users size={18} />
           </div>
 
-          <div>
+          <div className="min-w-0">
             <h2
               className="
-              font-semibold 
-              text-gray-800 dark:text-gray-100
-              hover:text-blue-600 dark:hover:text-blue-400
-              cursor-pointer transition
+              text-base font-semibold leading-6
+              text-gray-900 dark:text-gray-100
+              hover:text-blue-600 dark:hover:text-blue-300
+              cursor-pointer transition truncate
               "
               onClick={() => onView(group)}
             >
               {group.name}
             </h2>
 
-            <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-1">
               {group?.mentor?.fullName || "Chưa có giảng viên"}
             </p>
           </div>
         </div>
+
+        <span className="inline-flex shrink-0 items-center rounded-full bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 px-2.5 py-1 text-[11px] font-medium">
+          {studentCount} thành viên
+        </span>
       </div>
 
       {/* BODY */}
-      <div className="px-5 py-4">
-        <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+      <div className="px-5 py-4 space-y-3">
+        <p className="text-sm leading-6 text-gray-600 dark:text-gray-300 line-clamp-3 min-h-[4.5rem]">
           {group.description || "Không có mô tả"}
         </p>
+
+        <div className="flex flex-wrap gap-2">
+          <span className="inline-flex items-center rounded-full bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 px-2.5 py-1 text-xs font-medium">
+            Mã nhóm: {group.id.slice(0, 8)}
+          </span>
+          <span className="inline-flex items-center rounded-full bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300 px-2.5 py-1 text-xs font-medium">
+            {group.mentor?.fullName || "Chưa gán giảng viên"}
+          </span>
+        </div>
       </div>
 
       {/* FOOTER */}
@@ -76,18 +91,21 @@ const GroupCard = ({ group, onView }: GroupCardProps) => {
         px-5 py-3 
         border-t border-gray-100 dark:border-gray-800
         flex items-center justify-between
-        text-xs text-gray-500 dark:text-gray-400
+        bg-gray-50/70 dark:bg-gray-800/40
         "
       >
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
           <FileText size={14} />
-          <span>{group.id.slice(0, 8)}</span>
+          <span>Nhóm đang hoạt động</span>
         </div>
 
-        <div className="flex items-center gap-1 text-gray-400 dark:text-gray-500">
-          <Users size={14} />
-          <span>{group.students?.length || 0}</span>
-        </div>
+        <button
+          onClick={() => onView(group)}
+          className="inline-flex items-center gap-1.5 rounded-full bg-white dark:bg-gray-900 px-3 py-1.5 text-xs font-semibold text-blue-600 dark:text-blue-300 border border-blue-100 dark:border-blue-900/50 hover:border-blue-200 dark:hover:border-blue-800 hover:bg-blue-50/80 dark:hover:bg-blue-950/30 transition-colors"
+        >
+          <Users size={13} />
+          Xem nhóm
+        </button>
       </div>
     </div>
   );

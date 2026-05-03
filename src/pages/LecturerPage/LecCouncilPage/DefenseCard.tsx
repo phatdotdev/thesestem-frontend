@@ -1,12 +1,14 @@
 import {
-  CalendarCheck,
-  Clock,
   MapPin,
   ArrowRight,
   User,
   GraduationCap,
+  CalendarDays,
+  Timer,
+  Presentation,
 } from "lucide-react";
 import type { DefenseResponse } from "../../../types/defense";
+import { formatDateTimeVN } from "../../../utils/formatters";
 
 type Props = {
   d: DefenseResponse;
@@ -16,84 +18,121 @@ type Props = {
 const DefenseCard = ({ d, onClick }: Props) => {
   const student = d?.thesis?.student;
   const mentor = d?.thesis?.mentor;
+  const isDefended = (d?.scores?.length ?? 0) > 0;
   const hasSchedule = !!d.defenseTime;
+
+  const defenseTime = hasSchedule
+    ? formatDateTimeVN(d.defenseTime, {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Chưa xếp giờ";
 
   return (
     <div
       onClick={() => onClick?.(d)}
-      className="group cursor-pointer bg-white border border-gray-200 rounded-2xl overflow-hidden 
-      hover:shadow-lg hover:border-gray-300 transition-all duration-200 active:scale-[0.98]"
+      className="group relative cursor-pointer overflow-hidden rounded-2xl border border-gray-200 bg-white p-5 transition-colors duration-200 hover:border-gray-300 dark:border-gray-700 dark:bg-gray-900/70 dark:hover:border-gray-600"
     >
-      <div className="p-4 space-y-4 relative">
-        {/* ARROW */}
-        <ArrowRight
-          size={16}
-          className="absolute top-4 right-4 text-gray-300 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all"
-        />
-
-        {/* TITLE */}
-        <div className="pr-6">
-          <h3 className="font-semibold text-gray-800 text-sm group-hover:text-blue-600 transition">
-            {d.thesis?.title || "Chưa có tên đề tài"}
-          </h3>
-
-          {d.thesis?.titleEn && (
-            <p className="text-[11px] text-gray-400 italic truncate">
-              {d.thesis.titleEn}
-            </p>
-          )}
+      <div className="flex items-start gap-5">
+        {/* 1. ICON LỊCH BẢO VỆ (Trạng thái) */}
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border transition-colors ${
+            isDefended
+              ? "bg-gray-100 border-gray-200 text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300"
+              : "bg-gray-50 border-gray-200 text-gray-600 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400"
+          }`}
+        >
+          {isDefended ? <Presentation size={24} /> : <CalendarDays size={24} />}
         </div>
 
-        {/* INFO GRID */}
-        <div className="grid grid-cols-4 gap-3 text-sm">
-          {/* STUDENT */}
-          <div className="flex items-start gap-2">
-            <User size={14} className="text-gray-400 mt-0.5" />
-            <div>
-              <p className="text-[11px] text-gray-400">Sinh viên</p>
-              <p className="font-medium text-gray-800 truncate">
-                {student?.fullName || "Chưa có"}
-              </p>
-              {student?.studentCode && (
-                <p className="text-[11px] text-gray-400">
-                  {student.studentCode}
-                </p>
-              )}
+        {/* 2. THÔNG TIN CHÍNH (Tên đề tài + SV/GV) */}
+        <div className="min-w-0 flex-1 space-y-3">
+          <div>
+            <div className="flex items-center justify-between gap-2">
+              <h3 className="line-clamp-2 text-base font-semibold leading-6 text-gray-900 transition-colors group-hover:text-gray-900 dark:text-gray-100 dark:group-hover:text-white">
+                {d.thesis?.title || "Chưa có tên đề tài"}
+              </h3>
+              <ArrowRight
+                size={18}
+                className="shrink-0 -translate-x-1 text-gray-300 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100"
+              />
             </div>
+            {d.thesis?.titleEn && (
+              <p className="mt-0.5 line-clamp-1 text-xs italic text-gray-400 dark:text-gray-500">
+                {d.thesis.titleEn}
+              </p>
+            )}
           </div>
 
-          {/* MENTOR */}
-          <div className="flex items-start gap-2">
-            <GraduationCap size={14} className="text-gray-400 mt-0.5" />
-            <div>
-              <p className="text-[11px] text-gray-400">GV hướng dẫn</p>
-              <p className="font-medium text-gray-800 truncate">
-                {mentor?.fullName || "Chưa có"}
-              </p>
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Student */}
+            <div
+              className="
+                      flex items-center gap-1.5
+                      rounded-lg border
+                      px-2.5 py-1
+                      text-xs font-medium
+                      bg-gray-50
+                      text-gray-700
+                      border-gray-200
+                      dark:bg-gray-800
+                      dark:text-gray-300
+                      dark:border-gray-700
+                    "
+            >
+              <GraduationCap size={13} />
+              <span>
+                Sinh viên thực hiện: {student?.fullName || "N/A"} -{" "}
+                {student?.studentCode || "N/A"}
+              </span>
             </div>
-          </div>
 
-          {/* TIME */}
-          <div className="flex items-start gap-2">
-            <Clock size={14} className="text-gray-400 mt-0.5" />
-            <div>
-              <p className="text-[11px] text-gray-400">Thời gian</p>
-              <p className="font-medium text-gray-800">
-                {hasSchedule
-                  ? new Date(d.defenseTime!).toLocaleString("vi-VN")
-                  : "Chưa có"}
-              </p>
+            {/* Mentor */}
+            <div
+              className="
+                      flex items-center gap-1.5
+                      rounded-lg border
+                      px-2.5 py-1
+                      text-xs font-medium
+                      bg-gray-50
+                      text-gray-700
+                      border-gray-200
+                      dark:bg-gray-800
+                      dark:text-gray-300
+                      dark:border-gray-700
+                    "
+            >
+              <User size={13} />
+              Giảng viên hướng dẫn: {mentor?.fullName || "N/A"}
             </div>
-          </div>
 
-          {/* LOCATION */}
-          <div className="flex items-start gap-2">
-            <MapPin size={14} className="text-gray-400 mt-0.5" />
-            <div>
-              <p className="text-[11px] text-gray-400">Địa điểm</p>
-              <p className="font-medium text-gray-800 truncate">
-                {d.location || "Chưa có"}
-              </p>
+            {/* Time */}
+            <div
+              className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold ${
+                isDefended
+                  ? "border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300"
+                  : "border-amber-100 bg-amber-50 text-amber-700 dark:border-amber-800 dark:bg-amber-900/20 dark:text-amber-300"
+              }`}
+            >
+              <Timer size={13} /> Thời gian bảo vệ: {defenseTime}
+            </div>
+
+            {/* Location */}
+            <div
+              className="
+              flex items-center gap-1.5
+              rounded-lg border
+              px-2.5 py-1
+              text-xs font-semibold
+              bg-gray-50
+              text-gray-700
+              border-gray-200
+              dark:bg-gray-800
+              dark:text-gray-300
+              dark:border-gray-700
+            "
+            >
+              <MapPin size={13} /> Địa điểm: {d.location || "Chưa xếp phòng"}
             </div>
           </div>
         </div>

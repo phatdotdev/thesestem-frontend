@@ -3,10 +3,10 @@ import StudentThesisTopbar from "../../pages/StudentPage/StudentThesesPage/Stude
 
 const StudentThesisLayout = () => {
   return (
-    <>
+    <div className="space-y-4 sm:space-y-6">
       <StudentThesisTopbar />
       <Outlet />
-    </>
+    </div>
   );
 };
 

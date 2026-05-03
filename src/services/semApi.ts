@@ -15,6 +15,7 @@ import { api } from "./api";
 const SEM_URL = "/semesters";
 const REG_URL = "/registers";
 const COUN_URL = "/councils";
+const MILES_URL = "/milestones";
 
 export const semApi = api.injectEndpoints({
   endpoints: (builder) => ({
@@ -62,6 +63,17 @@ export const semApi = api.injectEndpoints({
       providesTags: ["SemesterStudent"],
     }),
 
+    searchStudentThesisBySemester: builder.query<
+      ApiResponse<PageResponse<StudentResponse>>,
+      { semesterId: string; form: StudentSearchForm }
+    >({
+      query: ({ semesterId, form }) => ({
+        url: `${SEM_URL}/${semesterId}/students/search`,
+        params: form,
+      }),
+      providesTags: ["SemesterStudent"],
+    }),
+
     addStudentToCurrentSemester: builder.mutation<ApiResponse<null>, string>({
       query: (id) => ({
         url: `${SEM_URL}/current/students/${id}`,
@@ -79,6 +91,13 @@ export const semApi = api.injectEndpoints({
         method: "DELETE",
       }),
       invalidatesTags: ["SemesterStudent"],
+    }),
+
+    checkStudentInCurrentSemester: builder.query<ApiResponse<boolean>, void>({
+      query: () => ({
+        url: `${SEM_URL}/current/students/me`,
+      }),
+      providesTags: ["SemesterStudent"],
     }),
 
     /* =========================================================
@@ -102,6 +121,17 @@ export const semApi = api.injectEndpoints({
     >({
       query: (form) => ({
         url: `${SEM_URL}/current/mentors/search`,
+        params: form,
+      }),
+      providesTags: ["SemesterMentor"],
+    }),
+
+    searchThesisMentorsBySemester: builder.query<
+      ApiResponse<PageResponse<LecturerResponse>>,
+      { semesterId: string; form: StudentSearchForm }
+    >({
+      query: ({ semesterId, form }) => ({
+        url: `${SEM_URL}/${semesterId}/mentors/search`,
         params: form,
       }),
       providesTags: ["SemesterMentor"],
@@ -195,6 +225,17 @@ export const semApi = api.injectEndpoints({
       providesTags: ["Council"],
     }),
 
+    searchCouncilsBySemester: builder.query<
+      ApiResponse<PageResponse<CouncilResponse>>,
+      { semesterId: string; form: any }
+    >({
+      query: ({ semesterId, form }) => ({
+        url: `${COUN_URL}/${semesterId}/search`,
+        params: form,
+      }),
+      providesTags: ["Council"],
+    }),
+
     createCouncil: builder.mutation<
       ApiResponse<CouncilResponse>,
       CreateCouncilRequest
@@ -226,6 +267,46 @@ export const semApi = api.injectEndpoints({
       }),
       invalidatesTags: ["Council"],
     }),
+
+    /* =========================================================
+                            MILESTONES
+    ========================================================= */
+
+    getCurrentSmilestones: builder.query<any, void>({
+      query: () => ({
+        url: `${SEM_URL}/current${MILES_URL}`,
+      }),
+      providesTags: ["Milestone"],
+    }),
+    getMilestonesBySemester: builder.query<any, string>({
+      query: (semesterId) => ({
+        url: `${SEM_URL}${MILES_URL}/semester/${semesterId}`,
+      }),
+      providesTags: ["Milestone"],
+    }),
+    createMilestone: builder.mutation<any, any>({
+      query: (data) => ({
+        url: `${SEM_URL}/current${MILES_URL}`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Milestone"],
+    }),
+    updateMilestone: builder.mutation<any, any>({
+      query: ({ id, data }) => ({
+        url: `${SEM_URL}/current${MILES_URL}/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Milestone"],
+    }),
+    deleteMilestone: builder.mutation<any, string>({
+      query: (id) => ({
+        url: `/${SEM_URL}${MILES_URL}/current/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Milestone"],
+    }),
   }),
 });
 
@@ -234,12 +315,18 @@ export const {
   useGetCurrentSemesterQuery,
   /* STUDENTS */
   useGetThesisStudentQuery,
+  useSearchStudentThesisBySemesterQuery,
+  useLazySearchStudentThesisBySemesterQuery,
   useSearchThesisStudentsQuery,
   useAddStudentToCurrentSemesterMutation,
   useRemoveStudentFromCurrentSemesterMutation,
+  useCheckStudentInCurrentSemesterQuery,
   /* MENTORS */
   useGetThesisMentorsQuery,
   useSearchThesisMentorsQuery,
+  useLazySearchThesisMentorsQuery,
+  useSearchThesisMentorsBySemesterQuery,
+  useLazySearchThesisMentorsBySemesterQuery,
   useAddMentorToCurrentSemesterMutation,
   useRemoveMentorFromCurrentSemesterMutation,
   useCheckMentorInCurrentSemesterQuery,
@@ -251,7 +338,15 @@ export const {
   useUpdateRegisterRequestStatusMutation,
   /* COUNCILS */
   useSearchCurrentCouncilsQuery,
+  useSearchCouncilsBySemesterQuery,
+  useLazySearchCouncilsBySemesterQuery,
   useCreateCouncilMutation,
   useUpdateCouncilMutation,
   useDeleteCouncilMutation,
+  /* MILESTONES */
+  useGetCurrentSmilestonesQuery,
+  useGetMilestonesBySemesterQuery,
+  useCreateMilestoneMutation,
+  useUpdateMilestoneMutation,
+  useDeleteMilestoneMutation,
 } = semApi;

@@ -86,7 +86,7 @@ const StdProfilePage = () => {
 
   if (isLoading) return <Loader />;
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-10">
+    <div className="mx-auto max-w-7xl space-y-6 pb-10 sm:space-y-8">
       {/* ===== Student Info ===== */}
       <SectionCard title="Thông tin sinh viên" icon={User}>
         <div className="flex flex-col md:flex-row gap-8">
@@ -104,7 +104,7 @@ const StdProfilePage = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400">
               JPG, PNG tối đa 5MB
             </p>
-            <div className="flex justify-end gap-4">
+            <div className="flex flex-wrap justify-center gap-3 sm:justify-end sm:gap-4">
               {!editingAvatar && (
                 <Button
                   icon={Edit}
@@ -210,7 +210,7 @@ const StdProfilePage = () => {
             />
           </div>
         </div>
-        <div className="flex justify-end gap-4">
+        <div className="flex flex-wrap justify-center gap-3 sm:justify-end sm:gap-4">
           {!editing && (
             <Button
               icon={Edit}

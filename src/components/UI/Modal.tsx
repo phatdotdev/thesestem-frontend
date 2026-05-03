@@ -1,5 +1,6 @@
 import { X } from "lucide-react";
 import { type ReactNode } from "react";
+import { createPortal } from "react-dom";
 
 type ModalProps = {
   open: boolean;
@@ -9,16 +10,16 @@ type ModalProps = {
 };
 
 const Modal = ({ open, onClose, children, width = "max-w-lg" }: ModalProps) => {
-  if (!open) return null;
+  if (!open || typeof document === "undefined") return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* BACKDROP */}
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       {/* MODAL */}
       <div
-        className={`relative w-full ${width} bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 z-10 animate-fade-in`}
+        className={`relative z-10 w-full ${width} animate-fade-in rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900`}
       >
         {/* CLOSE */}
         <button
@@ -30,7 +31,8 @@ const Modal = ({ open, onClose, children, width = "max-w-lg" }: ModalProps) => {
 
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 };
 

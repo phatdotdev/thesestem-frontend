@@ -1,6 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useEffect } from "react";
-import { removeToast } from "../../features/notification/notificationSlice";
+import { removeToast } from "../../features/notification/toastSlice";
 import type { RootState } from "../../app/store";
 import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
 

@@ -1,122 +1,422 @@
-import { useState } from "react";
-import { Search, Send, MoreVertical, User } from "lucide-react";
+import { MessageCircleMore, Send, Users, Wifi, WifiOff } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useParams } from "react-router-dom";
+import { useGetGroupByIdQuery } from "../../../../services/groupApi";
+import { useGetUserAccountQuery } from "../../../../services/userApi";
+import {
+  connectChatWS,
+  disconnectChatWS,
+  sendChatMessage,
+} from "../../../../websocket/chatWS";
+import { useGetGroupMessagesQuery } from "../../../../services/communicationApi";
 
-interface Message {
+type ChatMessageItem = {
   id: string;
-  sender: "mentor" | "student";
+  senderId: string;
+  senderName: string;
   content: string;
-  time: string;
-}
+  createdAt: string;
+  groupId?: string;
+  optimistic?: boolean;
+};
 
-interface Conversation {
-  id: string;
-  name: string;
-  lastMessage: string;
-  messages: Message[];
-}
+const isSameIncomingMessage = (
+  message: ChatMessageItem,
+  incoming: ChatMessageItem,
+) => {
+  if (message.id === incoming.id) {
+    return true;
+  }
 
-const mockConversations: Conversation[] = [
-  {
-    id: "1",
-    name: "Nguyễn Văn A",
-    lastMessage: "Em đã cập nhật chương 2 rồi ạ.",
-    messages: [
-      {
-        id: "1",
-        sender: "student",
-        content: "Thầy ơi em có vài thắc mắc về phần BPMN.",
-        time: "09:10",
-      },
-      {
-        id: "2",
-        sender: "mentor",
-        content: "Em gửi cụ thể vấn đề cho thầy xem nhé.",
-        time: "09:12",
-      },
-      {
-        id: "3",
-        sender: "student",
-        content: "Em đã cập nhật chương 2 rồi ạ.",
-        time: "09:30",
-      },
-    ],
-  },
-  {
-    id: "2",
-    name: "Nhóm AI Thesis",
-    lastMessage: "Deadline tuần này là thứ 6 nhé.",
-    messages: [
-      {
-        id: "1",
-        sender: "mentor",
-        content: "Deadline tuần này là thứ 6 nhé.",
-        time: "08:00",
-      },
-    ],
-  },
-];
+  if (
+    message.senderId !== incoming.senderId ||
+    message.content !== incoming.content
+  ) {
+    return false;
+  }
+
+  const messageAt = toDate(message.createdAt).getTime();
+  const incomingAt = toDate(incoming.createdAt).getTime();
+
+  if (Number.isNaN(messageAt) || Number.isNaN(incomingAt)) {
+    return message.createdAt === incoming.createdAt;
+  }
+
+  return Math.abs(messageAt - incomingAt) <= 1000;
+};
+
+const normalizeDateString = (value: string) => {
+  return value.replace(/(\.\d{3})\d+/, "$1").trim();
+};
+
+const toDate = (value: string) => {
+  return new Date(normalizeDateString(value));
+};
+
+const formatTime = (isoOrDate: string) => {
+  const date = toDate(isoOrDate);
+  if (Number.isNaN(date.getTime())) {
+    return new Date().toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  return date.toLocaleTimeString("vi-VN", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+};
+
+const isHttpUrl = (value: string) => {
+  try {
+    const url = new URL(value);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+};
+
+const renderMessageContent = (content: string, isMe: boolean) => {
+  const parts = content.split(/(https?:\/\/[^\s]+)/g);
+
+  return parts.map((part, index) => {
+    if (!isHttpUrl(part)) {
+      return <span key={`text-${index}`}>{part}</span>;
+    }
+
+    return (
+      <a
+        key={`link-${index}`}
+        href={part}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={`break-all underline ${
+          isMe
+            ? "text-blue-100 hover:text-white"
+            : "text-blue-600 hover:text-blue-700"
+        }`}
+      >
+        {part}
+      </a>
+    );
+  });
+};
+
+const getInitials = (name: string) => {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "TV";
+  if (words.length === 1) return words[0].slice(0, 2).toUpperCase();
+  return `${words[0][0]}${words[words.length - 1][0]}`.toUpperCase();
+};
+
+const asRecord = (value: unknown): Record<string, unknown> | null => {
+  if (typeof value === "object" && value !== null) {
+    return value as Record<string, unknown>;
+  }
+
+  return null;
+};
+
+const getString = (
+  obj: Record<string, unknown>,
+  keys: string[],
+): string | undefined => {
+  for (const key of keys) {
+    const value = obj[key];
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value;
+    }
+  }
+
+  return undefined;
+};
+
+const getArray = (
+  obj: Record<string, unknown>,
+  keys: string[],
+): unknown[] | null => {
+  for (const key of keys) {
+    const value = obj[key];
+    if (Array.isArray(value)) {
+      return value;
+    }
+  }
+
+  return null;
+};
+
+const normalizeIncomingMessage = (payload: unknown): ChatMessageItem | null => {
+  const rootRecord = asRecord(payload);
+  if (!rootRecord) return null;
+
+  const dataRecord = asRecord(rootRecord.data);
+  const source = dataRecord ?? rootRecord;
+
+  const senderRecord = asRecord(source.sender);
+  const content = getString(source, ["content", "message", "text"]);
+  if (!content) return null;
+
+  return {
+    id:
+      getString(source, ["id", "messageId"]) ??
+      `remote-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    senderId:
+      getString(source, ["senderId"]) ??
+      (senderRecord ? getString(senderRecord, ["id"]) : undefined) ??
+      "",
+    senderName:
+      getString(source, ["senderName"]) ??
+      (senderRecord
+        ? getString(senderRecord, ["fullName", "name", "username"])
+        : undefined) ??
+      "Thành viên",
+    content,
+    createdAt: normalizeDateString(
+      getString(source, ["createdAt", "time", "timestamp"]) ??
+        new Date().toISOString(),
+    ),
+    groupId: getString(source, ["groupId"]),
+  };
+};
+
+const normalizeHistoryMessages = (payload: unknown): ChatMessageItem[] => {
+  if (Array.isArray(payload)) {
+    return payload
+      .map((item) => normalizeIncomingMessage(item))
+      .filter((item): item is ChatMessageItem => item !== null);
+  }
+
+  const rootRecord = asRecord(payload);
+  if (!rootRecord) {
+    return [];
+  }
+
+  const dataRecord = asRecord(rootRecord.data);
+  const source = dataRecord ?? rootRecord;
+
+  const list =
+    getArray(source, ["content", "messages", "items"]) ??
+    (Array.isArray(source.data) ? source.data : null);
+
+  if (!list) {
+    return [];
+  }
+
+  return list
+    .map((item) => normalizeIncomingMessage(item))
+    .filter((item): item is ChatMessageItem => item !== null);
+};
 
 const MentorChatPage = () => {
-  const [selectedId, setSelectedId] = useState("1");
-  const [newMessage, setNewMessage] = useState("");
+  const { ["group-id"]: groupIdFromRoute } = useParams();
+  const groupId = groupIdFromRoute ?? null;
 
-  const selectedConversation = mockConversations.find(
-    (c) => c.id === selectedId,
+  const [messages, setMessages] = useState<ChatMessageItem[]>([]);
+  const [text, setText] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const { data: groupResponse } = useGetGroupByIdQuery(groupId ?? "", {
+    skip: !groupId,
+  });
+  const { data: accountResponse } = useGetUserAccountQuery();
+
+  const group = groupResponse?.data;
+  const currentUserId = accountResponse?.data?.id ?? "";
+
+  const { data: groupMessagesResponse } = useGetGroupMessagesQuery(
+    groupId ?? "",
+    {
+      skip: !groupId,
+    },
   );
 
-  const handleSend = () => {
-    if (!newMessage.trim()) return;
-    alert("Mock gửi tin nhắn: " + newMessage);
-    setNewMessage("");
+  useEffect(() => {
+    if (!groupId) return;
+
+    connectChatWS(groupId, (payload: unknown) => {
+      const incoming = normalizeIncomingMessage(payload);
+      if (!incoming) return;
+
+      if (incoming.groupId && incoming.groupId !== groupId) {
+        return;
+      }
+
+      setMessages((prev) => {
+        if (prev.some((item) => isSameIncomingMessage(item, incoming))) {
+          return prev;
+        }
+
+        return [...prev, incoming];
+      });
+    });
+    setIsConnected(true);
+
+    return () => {
+      disconnectChatWS();
+      setIsConnected(false);
+    };
+  }, [groupId]);
+
+  useEffect(() => {
+    if (!groupId) {
+      setMessages([]);
+      return;
+    }
+
+    const historyMessages = normalizeHistoryMessages(
+      groupMessagesResponse?.data,
+    );
+    if (historyMessages.length === 0) {
+      return;
+    }
+
+    setMessages((prev) => {
+      if (prev.length === 0) {
+        return historyMessages;
+      }
+
+      const merged = [...historyMessages];
+      for (const message of prev) {
+        if (!merged.some((item) => isSameIncomingMessage(item, message))) {
+          merged.push(message);
+        }
+      }
+
+      return merged;
+    });
+  }, [groupId, groupMessagesResponse]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages.length]);
+
+  const orderedMessages = useMemo(
+    () =>
+      [...messages].sort(
+        (a, b) => toDate(a.createdAt).getTime() - toDate(b.createdAt).getTime(),
+      ),
+    [messages],
+  );
+
+  const sendMessage = () => {
+    if (!text.trim() || !groupId) return;
+
+    const content = text.trim();
+    setText("");
+
+    sendChatMessage(content, groupId);
   };
 
+  const canSend = !!text.trim() && !!groupId;
+
   return (
-    <div className="bg-white border border-gray-200 shadow rounded-2xl h-[72vh] flex overflow-hidden">
-      {/* CHAT AREA */}
-      <div className="flex-1 flex flex-col">
-        <>
-          {/* MESSAGES */}
-          <div className="flex-1 p-4 max-h-140 overflow-y-auto space-y-4 bg-gray-50">
-            {selectedConversation?.messages.map((msg) => (
+    <div className="relative flex h-[calc(100vh-280px)] flex-col overflow-hidden rounded-3xl border border-gray-200/80 bg-white/95 shadow-sm dark:border-gray-700 dark:bg-gray-900/95">
+      <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-r from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900" />
+
+      <div className="relative z-10 flex items-center justify-between border-b border-gray-200/80 px-4 py-3 dark:border-gray-700">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200">
+            <Users className="h-5 w-5" />
+          </div>
+          <div className="min-w-0">
+            <h2 className="truncate text-sm font-semibold text-gray-900 dark:text-gray-100">
+              {group?.name || "Chat nhóm"}
+            </h2>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {group?.students?.length ?? 0} sinh viên
+            </p>
+          </div>
+        </div>
+
+        <div
+          className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium ${
+            isConnected
+              ? "border-gray-200 bg-gray-100 text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200"
+              : "border-gray-200 bg-gray-100 text-gray-500 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400"
+          }`}
+        >
+          {isConnected ? (
+            <Wifi className="h-3.5 w-3.5" />
+          ) : (
+            <WifiOff className="h-3.5 w-3.5" />
+          )}
+          {isConnected ? "Đang kết nối" : "Mất kết nối"}
+        </div>
+      </div>
+
+      <div className="relative z-10 flex-1 space-y-4 overflow-y-auto bg-gray-50/70 p-4 dark:bg-gray-800/60">
+        {orderedMessages.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+            <MessageCircleMore className="h-9 w-9 text-gray-300 dark:text-gray-600" />
+            <p>Chưa có tin nhắn nào. Hãy bắt đầu trao đổi với nhóm.</p>
+          </div>
+        ) : (
+          orderedMessages.map((message) => {
+            const isMe = !!currentUserId && message.senderId === currentUserId;
+
+            return (
               <div
-                key={msg.id}
-                className={`flex ${
-                  msg.sender === "mentor" ? "justify-end" : "justify-start"
-                }`}
+                key={message.id}
+                className={`flex items-end gap-2 ${isMe ? "justify-end" : "justify-start"}`}
               >
+                {!isMe && (
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gray-200 text-[10px] font-semibold text-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                    {getInitials(message.senderName)}
+                  </div>
+                )}
+
                 <div
-                  className={`max-w-xs px-4 py-2 rounded-2xl text-sm ${
-                    msg.sender === "mentor"
-                      ? "bg-blue-600 text-white rounded-br-none"
-                      : "bg-white border rounded-bl-none"
+                  className={`max-w-[78%] rounded-2xl px-3.5 py-2.5 text-sm shadow-sm ring-1 ${
+                    isMe
+                      ? "rounded-br-sm bg-gray-800 text-white ring-gray-700 dark:bg-gray-100 dark:text-gray-900 dark:ring-gray-200"
+                      : "rounded-bl-sm bg-white text-gray-800 ring-gray-200 dark:bg-gray-900 dark:text-gray-100 dark:ring-gray-700"
                   }`}
                 >
-                  <p>{msg.content}</p>
-                  <p className="text-[10px] mt-1 opacity-70 text-right">
-                    {msg.time}
+                  {!isMe && (
+                    <p className="mb-1 text-[11px] font-semibold text-gray-600 dark:text-gray-300">
+                      {message.senderName}
+                    </p>
+                  )}
+                  <p className="whitespace-pre-wrap break-words leading-relaxed">
+                    {renderMessageContent(message.content, isMe)}
+                  </p>
+                  <p className="mt-1.5 text-right text-[10px] opacity-70">
+                    {formatTime(message.createdAt)}
                   </p>
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })
+        )}
+        <div ref={bottomRef} />
+      </div>
 
-          {/* INPUT */}
-          <div className="p-4 border-t flex items-center gap-3">
-            <input
-              type="text"
-              placeholder="Nhập tin nhắn..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              className="flex-1 border rounded-full px-4 py-2 focus:ring-2 focus:ring-blue-500 outline-none"
-            />
-            <button
-              onClick={handleSend}
-              className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full transition"
-            >
-              <Send className="h-4 w-4" />
-            </button>
-          </div>
-        </>
+      <div className="relative z-10 border-t border-gray-200/80 bg-white px-4 py-3 dark:border-gray-700 dark:bg-gray-900">
+        <div className="flex items-end gap-2 rounded-2xl border border-gray-200 bg-gray-50 p-2 dark:border-gray-700 dark:bg-gray-800">
+          <input
+            value={text}
+            onChange={(event) => setText(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+              }
+            }}
+            placeholder="Nhập tin nhắn..."
+            disabled={!groupId}
+            className="h-9 flex-1 rounded-xl border border-transparent bg-transparent px-3 text-sm text-gray-800 outline-none placeholder:text-gray-400 focus:border-gray-300 focus:bg-white dark:text-gray-100 dark:placeholder:text-gray-500 dark:focus:border-gray-600 dark:focus:bg-gray-900"
+          />
+          <button
+            onClick={sendMessage}
+            disabled={!canSend}
+            className="inline-flex h-9 items-center gap-1 rounded-xl bg-gray-800 px-3 text-sm font-medium text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-200"
+          >
+            <Send className="h-4 w-4" />
+            Gửi
+          </button>
+        </div>
       </div>
     </div>
   );

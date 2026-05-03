@@ -23,6 +23,9 @@ export type CouncilRequest = {
   code: string;
   name: string;
   members: MemberRequest[];
+  collegeId: string | null;
+  facultyId: string | null;
+  departmentId: string | null;
 };
 
 export type CreateCouncilRequest = CouncilRequest;
@@ -38,4 +41,16 @@ export interface CouncilResponse {
   name: string;
   semester: string;
   members: CouncilMemberResponse[];
+  college: {
+    id: string;
+    name: string;
+  };
+  faculty: {
+    id: string;
+    name: string;
+  };
+  department: {
+    id: string;
+    name: string;
+  };
 }

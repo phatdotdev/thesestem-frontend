@@ -41,16 +41,16 @@ const UserManagementPage = () => {
     <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm p-6 space-y-6">
       {/* HEADER */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300 rounded-xl p-3 flex items-center justify-center">
-            <UserRoundCog size={28} />
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-800 flex items-center justify-center text-blue-500 dark:text-blue-400">
+            <UserRoundCog size={20} />
           </div>
 
           <div>
-            <h1 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
+            <h1 className="text-lg font-bold text-gray-800 dark:text-gray-100">
               Quản lý người dùng
             </h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-gray-400 dark:text-gray-500 mt-0.5">
               Quản lý tài khoản người dùng trong hệ thống
             </p>
           </div>

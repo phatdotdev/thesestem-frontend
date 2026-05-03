@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import clsx from "clsx";
 import { type LucideIcon } from "lucide-react";
 import { useGetLecturersQuery } from "../../../services/userApi";
+import type { LecturerResponse } from "../../../types/lecturer";
 
 type SelectVariant = "default" | "outline" | "filled" | "ghost";
 type SelectSize = "xs" | "sm" | "md" | "lg";
@@ -71,9 +72,15 @@ const SearchableLecturerSelect = ({
     code: keyword,
   });
 
-  const lecturers = lecturersResponse?.data || [];
+  const lecturers: LecturerResponse[] = lecturersResponse?.data || [];
 
-  const selected = lecturers.find((l: any) => l.id === value);
+  const getWorkUnitLabel = (lecturer: LecturerResponse) => {
+    if (lecturer.department?.name) return lecturer.department.name;
+    if (lecturer.faculty?.name) return lecturer.faculty.name;
+    return "Chưa có đơn vị";
+  };
+
+  const selected = lecturers.find((l) => l.id === value);
 
   useEffect(() => {
     const handleClickOutside = (e: any) => {
@@ -139,7 +146,7 @@ const SearchableLecturerSelect = ({
             open
               ? keyword
               : selected
-                ? `${selected.fullName} - ${selected.lecturerCode}`
+                ? `${selected.fullName} - ${selected.lecturerCode} (${getWorkUnitLabel(selected)})`
                 : ""
           }
           onChange={(e) => {
@@ -163,7 +170,7 @@ const SearchableLecturerSelect = ({
             </div>
           )}
 
-          {lecturers.map((l: any) => (
+          {lecturers.map((l) => (
             <div
               key={l.id}
               className="px-3 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
@@ -174,7 +181,9 @@ const SearchableLecturerSelect = ({
               }}
             >
               <div className="text-sm font-medium">{l.fullName}</div>
-              <div className="text-xs text-gray-500">{l.lecturerCode}</div>
+              <div className="text-xs text-gray-500">
+                {l.lecturerCode} - {getWorkUnitLabel(l)}
+              </div>
             </div>
           ))}
         </div>

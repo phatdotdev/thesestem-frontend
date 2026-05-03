@@ -9,7 +9,7 @@ import NavItem from "./NavItem";
 const Header = () => {
   const navigate = useNavigate();
   return (
-    <header className="sticky top-0 z-50 border-b border-gray-200 dark:border-gray-800">
+    <header className="sticky top-0 z-50 border-b bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800">
       <div className="flex justify-between items-center h-16 px-4 lg:px-[100px] mx-auto">
         {/* Logo */}
         <div className="flex items-center gap-2 cursor-pointer">
@@ -27,9 +27,28 @@ const Header = () => {
           style={{ fontFamily: "Roboto" }}
           className=" font-semibold hidden md:flex items-center gap-8 text-gray-700 text-lg"
         >
-          <NavItem size="sm" icon={Home} to="/" label="Trang chủ" />
-          <NavItem size="sm" icon={BookOpen} to="/theses" label="Luận văn" />
-          <NavItem size="sm" icon={Building2} to="/orgs" label="Tổ chức" />
+          <NavItem
+            size="sm"
+            icon={Home}
+            to="/"
+            label="Trang chủ"
+            exact
+            borderPosition="bottom"
+          />
+          <NavItem
+            size="sm"
+            icon={BookOpen}
+            to="/theses"
+            label="Luận văn"
+            borderPosition="bottom"
+          />
+          <NavItem
+            size="sm"
+            icon={Building2}
+            to="/orgs"
+            label="Tổ chức"
+            borderPosition="bottom"
+          />
         </nav>
 
         {/* Auth */}

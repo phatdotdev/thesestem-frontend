@@ -11,6 +11,7 @@ import {
   MdLayers,
   MdOutlineRateReview,
   MdCoPresent,
+  MdLibraryBooks,
 } from "react-icons/md";
 import {
   FaUniversity,
@@ -20,10 +21,13 @@ import {
   FaUserTie,
 } from "react-icons/fa";
 
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import NavItem from "../../components/header/NavItem";
-import { useAppSelector } from "../../app/hook";
-import { HiPresentationChartBar } from "react-icons/hi";
+import { useAppDispatch, useAppSelector } from "../../app/hook";
+import LogoutButton from "../../components/UI/LogoutButton";
+import { useLogoutMutation } from "../../services/authApi";
+import { logout } from "../../features/auth/authSlice";
+import { Ban, Banknote, Book } from "lucide-react";
 
 const Section = ({ title, children }: any) => (
   <div className="space-y-1">
@@ -37,19 +41,34 @@ const Section = ({ title, children }: any) => (
 const OrgSidebar = () => {
   const { "org-code": orgCode } = useParams();
   const logoUrl = useAppSelector((state) => state.organization.logoUrl);
-
+  const [logoutRequest] = useLogoutMutation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await logoutRequest({}).unwrap();
+    } catch {
+    } finally {
+      dispatch(logout());
+      navigate(orgCode ? `/${orgCode}/login` : "/login", { replace: true });
+    }
+  };
   return (
     <aside
       className="
         flex flex-col
         w-20 md:w-60
+        overflow-x-hidden
         bg-white dark:bg-gray-900
         border-r border-gray-200 dark:border-gray-800
         transition-all duration-300
       "
     >
       {/* LOGO */}
-      <div className="flex h-20 items-center justify-center border-b border-gray-100 dark:border-gray-800 gap-4">
+      <div
+        onClick={() => navigate(`/${orgCode}/m`)}
+        className="cursor-pointer flex h-20 items-center justify-center border-b border-gray-100 dark:border-gray-800 gap-4"
+      >
         <img
           src={logoUrl}
           alt="logo"
@@ -66,7 +85,7 @@ const OrgSidebar = () => {
       </div>
 
       {/* MENU */}
-      <nav className="flex-1 overflow-y-auto px-2 py-4 space-y-2">
+      <nav className="flex-1 overflow-x-hidden overflow-y-auto px-2 py-4 space-y-2">
         <Section title="Quản lý tổ chức">
           <NavItem to={`/${orgCode}/m/info`} label="Thông tin" icon={MdInfo} />
           <NavItem
@@ -86,6 +105,11 @@ const OrgSidebar = () => {
             to={`/${orgCode}/m/faculties`}
             label="Khoa"
             icon={MdApartment}
+          />
+          <NavItem
+            to={`/${orgCode}/m/departments`}
+            label="Bộ môn"
+            icon={MdLibraryBooks}
           />
           <NavItem
             to={`/${orgCode}/m/programs`}
@@ -142,12 +166,12 @@ const OrgSidebar = () => {
             icon={FaChalkboardTeacher}
           />
           <NavItem
-            to={`/${orgCode}/m/thesis-topics`}
+            to={`/${orgCode}/m/semester-theses`}
             label="Đề tài"
             icon={MdTopic}
           />
           <NavItem
-            to={`/${orgCode}/m/semester-committees`}
+            to={`/${orgCode}/m/semester-councils`}
             label="Hội đồng"
             icon={MdOutlineRateReview}
           />
@@ -169,6 +193,7 @@ const OrgSidebar = () => {
             label="Cài đặt"
             icon={MdSettings}
           />
+          <LogoutButton onLogout={handleLogout} />
         </Section>
       </nav>
     </aside>

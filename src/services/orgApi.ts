@@ -5,7 +5,7 @@ import type {
   ProgramResponse,
   UpdateOrgInfoProps,
 } from "../types/organization";
-import type { ApiResponse } from "../types/response";
+import type { ApiResponse, PageResponse } from "../types/response";
 import { api } from "./api";
 
 const ORG_URL = "/orgs";
@@ -27,11 +27,20 @@ export const orgApi = api.injectEndpoints({
       query: () => ({
         url: `${ORG_URL}/mine`,
       }),
+      providesTags: ["Organization"],
+    }),
+    searchOrgs: builder.query<ApiResponse<PageResponse<OrgProps>>, any>({
+      query: (form) => ({
+        url: `${ORG_URL}/search`,
+        params: form,
+      }),
+      providesTags: ["Organization"],
     }),
     searchOrgInfoByCode: builder.query<ApiResponse<OrgProps>, string>({
       query: (code) => ({
         url: `${ORG_URL}/search/${code}`,
       }),
+      providesTags: ["Organization"],
     }),
     updateOrgInfo: builder.mutation<ApiResponse<OrgProps>, UpdateOrgInfoProps>({
       query: (data) => ({
@@ -39,6 +48,7 @@ export const orgApi = api.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Organization"],
     }),
     updateOrgMedia: builder.mutation<ApiResponse<OrgProps>, FormData>({
       query: (data) => ({
@@ -46,6 +56,7 @@ export const orgApi = api.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Organization"],
     }),
     /* STRUCTURE */
     getOrgStructure: builder.query<ApiResponse<OrgStructureProps>, void>({
@@ -166,9 +177,13 @@ export const orgApi = api.injectEndpoints({
       invalidatesTags: ["Structure"],
     }),
     /* PROGRAMS */
-    getPrograms: builder.query<ApiResponse<ProgramResponse[]>, void>({
-      query: () => ({
+    getPrograms: builder.query<
+      ApiResponse<ProgramResponse[]>,
+      any | undefined | null
+    >({
+      query: (form) => ({
         url: `${PRO_URL}`,
+        params: form,
       }),
       providesTags: ["Program"],
     }),
@@ -200,6 +215,7 @@ export const orgApi = api.injectEndpoints({
       query: () => ({
         url: `${ROLE_URL}`,
       }),
+      providesTags: ["Role", "Council"],
     }),
     addRole: builder.mutation<ApiResponse<any>, any>({
       query: (data) => ({
@@ -207,6 +223,7 @@ export const orgApi = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Role", "Council"],
     }),
     updateRole: builder.mutation<ApiResponse<any>, any>({
       query: ({ id, data }) => ({
@@ -214,12 +231,14 @@ export const orgApi = api.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Role", "Council"],
     }),
     deleteRole: builder.mutation<ApiResponse<any>, any>({
       query: (id) => ({
         url: `${ROLE_URL}/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Role", "Council"],
     }),
     // GET YEARS
     getYears: builder.query<ApiResponse<any[]>, void>({
@@ -259,6 +278,7 @@ export const orgApi = api.injectEndpoints({
       query: (id) => ({
         url: `${YEAR_URL}/${id}/semesters`,
       }),
+      providesTags: ["Year", "Semester"],
     }),
     // ADD SEMESTER
     addSemeseter: builder.mutation<ApiResponse<any[]>, any>({
@@ -267,6 +287,7 @@ export const orgApi = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Year", "Semester"],
     }),
     // UPDATE SEMESTER
     updateSemester: builder.mutation<ApiResponse<any[]>, any>({
@@ -275,12 +296,14 @@ export const orgApi = api.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Year", "Semester"],
     }),
     updateSemesterStatus: builder.mutation<ApiResponse<any[]>, any>({
       query: ({ id, status }) => ({
         url: `${SEM_URL}/${id}/status/${status}`,
         method: "PUT",
       }),
+      invalidatesTags: ["Year", "Semester"],
     }),
     // DELETE SEMESTER
     deleteSemester: builder.mutation<ApiResponse<any[]>, any>({
@@ -288,11 +311,13 @@ export const orgApi = api.injectEndpoints({
         url: `${SEM_URL}/${id}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Year", "Semester"],
     }),
   }),
 });
 
 export const {
+  useSearchOrgsQuery,
   useSearchOrgInfoByCodeQuery,
   useLazySearchOrgInfoByCodeQuery,
   useGetOrgInfoQuery,

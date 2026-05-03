@@ -1,5 +1,4 @@
-import { getColor } from "../../../../utils/getColor";
-import { getInitials } from "../../../../utils/getInitials";
+import AvatarInitial from "../../../../components/UI/AvatarInitial";
 import { truncateWords } from "../../../../utils/truncateWord";
 import type { ThesisResponse } from "../../../../types/thesis";
 
@@ -40,16 +39,7 @@ const ThesisCard = ({
 
           <div className="flex items-center gap-2">
             {/* Avatar */}
-            <div
-              className={`
-                w-8 h-8 rounded-full flex items-center justify-center
-                text-xs font-semibold text-white
-                ${getColor(student?.fullName)}
-                shadow-sm
-              `}
-            >
-              {getInitials(student?.fullName)}
-            </div>
+            <AvatarInitial fullName={student?.fullName} size={32} />
 
             {/* Info */}
             <div className="min-w-0">
@@ -71,16 +61,7 @@ const ThesisCard = ({
 
           <div className="flex items-center gap-2">
             {/* Avatar */}
-            <div
-              className={`
-                w-8 h-8 rounded-full flex items-center justify-center
-                text-xs font-semibold text-white
-                ${getColor(mentor?.fullName)}
-                shadow-sm
-              `}
-            >
-              {getInitials(mentor?.fullName)}
-            </div>
+            <AvatarInitial fullName={mentor?.fullName} size={32} />
 
             {/* Info */}
             <div className="min-w-0">

@@ -1,95 +1,162 @@
-import { CalendarClock, Video, MapPin, User } from "lucide-react";
+import { CalendarClock, Video, MapPin, ExternalLink } from "lucide-react";
+import { useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import Badge from "../../../../components/UI/Badge";
+import EmptyState from "../../../../components/UI/EmptyState";
+import { useGetGroupMeetingsQuery } from "../../../../services/groupApi";
+import type { MeetingResponse } from "../../../../types/group";
+import {
+  formatDateRangeVN,
+  formatDateTimeVN,
+} from "../../../../utils/formatters";
 
-const meetings = [
-  {
-    id: 1,
-    title: "Lập trình Java",
-    lecturer: "ThS. Nguyễn Văn A",
-    date: "2026-04-15",
-    start: "08:00",
-    end: "09:30",
-    type: "online",
-    link: "https://meet.google.com/abc-xyz",
-  },
-  {
-    id: 2,
-    title: "Công nghệ phần mềm",
-    lecturer: "ThS. Trần Thị B",
-    date: "2026-04-15",
-    start: "13:30",
-    end: "15:00",
-    type: "offline",
-    room: "Phòng B204",
-  },
-];
+type MeetingStatus = "ALL" | "UPCOMING" | "ONGOING" | "COMPLETED";
 
 const MeetingsPage = () => {
-  return (
-    <div className="space-y-6 mt-6">
-      {/* HEADER */}
-      <div className="flex items-center justify-between">
-        <h1 className="flex items-center gap-2 text-xl font-semibold">
-          <CalendarClock className="h-5 w-5 text-green-600" />
-          Lịch họp
-        </h1>
+  const { ["group-id"]: id } = useParams();
+  const { data: meetingsResponse } = useGetGroupMeetingsQuery(id || "");
+  const [filter, setFilter] = useState<MeetingStatus>("ALL");
 
-        <button className="rounded-lg border px-4 py-2 text-sm hover:bg-gray-100">
-          Hôm nay
-        </button>
+  const meetings: MeetingResponse[] = meetingsResponse?.data || [];
+
+  const getMeetingStatus = (meeting: MeetingResponse): MeetingStatus => {
+    const now = Date.now();
+    const start = new Date(meeting.startAt).getTime();
+    const end = new Date(meeting.endAt).getTime();
+
+    if (now < start) return "UPCOMING";
+    if (now <= end) return "ONGOING";
+    return "COMPLETED";
+  };
+
+  const filteredMeetings = useMemo(() => {
+    if (filter === "ALL") return meetings;
+
+    return meetings.filter((meeting) => getMeetingStatus(meeting) === filter);
+  }, [filter, meetings]);
+
+  return (
+    <div className="mt-6 space-y-8 rounded-3xl border border-gray-200/80 bg-white/95 p-6 text-gray-800 shadow-sm dark:border-gray-700 dark:bg-gray-900/95 dark:text-gray-100">
+      {/* HEADER */}
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex items-center gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <CalendarClock size={24} />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Lịch họp nhóm
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Theo dõi các cuộc họp do giảng viên thiết lập cho nhóm.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Badge
+            label="Tất cả"
+            onClick={() => setFilter("ALL")}
+            variant={filter === "ALL" ? "primary" : "outline"}
+          />
+          <Badge
+            label="Sắp diễn ra"
+            onClick={() => setFilter("UPCOMING")}
+            variant={filter === "UPCOMING" ? "primary" : "outline"}
+          />
+          <Badge
+            label="Đang diễn ra"
+            onClick={() => setFilter("ONGOING")}
+            variant={filter === "ONGOING" ? "success" : "outline"}
+          />
+          <Badge
+            label="Đã diễn ra"
+            onClick={() => setFilter("COMPLETED")}
+            variant={filter === "COMPLETED" ? "outline" : "ghost"}
+          />
+        </div>
       </div>
 
       {/* MEETING LIST */}
-      <div className="space-y-4">
-        {meetings.map((m) => (
-          <div
-            key={m.id}
-            className="rounded-xl border bg-white p-4 shadow-sm hover:shadow-md transition"
-          >
-            {/* TIME */}
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-green-600">
-                ⏰ {m.start} – {m.end}
-              </span>
-              <span className="text-xs text-gray-500">{m.date}</span>
-            </div>
+      {filteredMeetings.length === 0 ? (
+        <EmptyState
+          icon={CalendarClock}
+          title="Không có cuộc họp nào"
+          description="Giảng viên chưa thêm lịch họp cho nhóm ở thời điểm hiện tại."
+        />
+      ) : (
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {filteredMeetings.map((meeting) => {
+            const meetingStatus = getMeetingStatus(meeting);
+            const hasUrl = !!meeting.url;
 
-            {/* TITLE */}
-            <h3 className="mt-1 text-lg font-semibold">{m.title}</h3>
+            return (
+              <div
+                key={meeting.id}
+                className="rounded-2xl border border-gray-200/80 dark:border-gray-700 bg-white/95 dark:bg-gray-900/95 p-4 shadow-sm hover:shadow-md transition"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <h3 className="line-clamp-2 text-base font-semibold text-gray-800 dark:text-gray-100">
+                    {meeting.title}
+                  </h3>
 
-            {/* LECTURER */}
-            <p className="mt-1 flex items-center gap-1 text-sm text-gray-600">
-              <User className="h-4 w-4" />
-              {m.lecturer}
-            </p>
+                  {meetingStatus === "UPCOMING" && (
+                    <Badge
+                      label="Sắp diễn ra"
+                      variant="primary"
+                      size="sm"
+                      dot
+                    />
+                  )}
+                  {meetingStatus === "ONGOING" && (
+                    <Badge
+                      label="Đang diễn ra"
+                      variant="success"
+                      size="sm"
+                      dot
+                    />
+                  )}
+                  {meetingStatus === "COMPLETED" && (
+                    <Badge label="Đã diễn ra" variant="outline" size="sm" dot />
+                  )}
+                </div>
 
-            {/* LOCATION */}
-            <div className="mt-3 flex items-center justify-between">
-              {m.type === "online" ? (
-                <p className="flex items-center gap-1 text-sm text-blue-600">
-                  <Video className="h-4 w-4" />
-                  Online (Google Meet)
-                </p>
-              ) : (
-                <p className="flex items-center gap-1 text-sm text-gray-700">
-                  <MapPin className="h-4 w-4" />
-                  {m.room}
-                </p>
-              )}
+                {meeting.description && (
+                  <p className="mt-1 line-clamp-2 text-sm text-gray-500 dark:text-gray-400">
+                    {meeting.description}
+                  </p>
+                )}
 
-              {m.type === "online" && (
-                <a
-                  href={m.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-lg bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700"
-                >
-                  Vào phòng họp
-                </a>
-              )}
-            </div>
-          </div>
-        ))}
-      </div>
+                <div className="mt-3 flex items-center justify-between gap-3 flex-wrap">
+                  <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                    <CalendarClock className="h-4 w-4" />
+                    {formatDateRangeVN(meeting.startAt, meeting.endAt) ||
+                      formatDateTimeVN(meeting.startAt)}
+                  </div>
+
+                  {hasUrl ? (
+                    <a
+                      href={meeting.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 rounded-lg bg-green-600 dark:bg-green-500 px-3 py-1.5 text-sm text-white hover:bg-green-700 dark:hover:bg-green-600"
+                    >
+                      <Video className="h-4 w-4" />
+                      Vào phòng họp
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
+                      <MapPin className="h-4 w-4" />
+                      Họp trực tiếp
+                    </span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 };

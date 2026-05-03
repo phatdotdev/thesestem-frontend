@@ -26,8 +26,8 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.token = null;
 
-      // ❌ xoá token
       localStorage.removeItem("access_token");
+      localStorage.removeItem("accessToken");
     },
   },
 });

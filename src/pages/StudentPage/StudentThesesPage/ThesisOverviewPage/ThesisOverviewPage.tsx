@@ -1,20 +1,32 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   useGetStudentThesisByIdQuery,
+  useProgressThesisMutation,
+  useRejectThesisMutation,
   useUpdateThesisMutation,
 } from "../../../../services/thesisApi";
 import Button from "../../../../components/UI/Button";
 import Input from "../../../../components/UI/Input";
-import { Compass, Save } from "lucide-react";
+import { Compass, Info, Save } from "lucide-react";
 import Textarea from "../../../../components/UI/TextArea";
+import Badge from "../../../../components/UI/Badge";
+import ConfirmModal from "../../../../components/UI/ConfirmModal";
 
 const ThesisOverviewPage = () => {
   const { ["thesis-id"]: id } = useParams();
 
   const { data, isLoading } = useGetStudentThesisByIdQuery(id as string);
   const [updateThesis, { isLoading: isUpdating }] = useUpdateThesisMutation();
+  const [progressThesis] = useProgressThesisMutation();
+  const [rejectThesis] = useRejectThesisMutation();
 
+  const navigate = useNavigate();
+  const goToParentPath = () => {
+    const parentPath = location.pathname.split("/").slice(0, -1).join("/");
+
+    navigate(parentPath);
+  };
   const thesis = data?.data;
 
   const [form, setForm] = useState({
@@ -39,7 +51,7 @@ const ThesisOverviewPage = () => {
     }
   }, [thesis]);
 
-  const handleChange = (key: string, value: any) => {
+  const handleChange = async (key: string, value: any) => {
     setForm((prev) => ({
       ...prev,
       [key]: value,
@@ -59,6 +71,9 @@ const ThesisOverviewPage = () => {
       alert("Có lỗi xảy ra!");
     }
   };
+
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
 
   if (isLoading) return null;
 
@@ -126,35 +141,59 @@ const ThesisOverviewPage = () => {
         </div>
 
         {/* STATUS */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Trạng thái
-          </label>
+        <div className="col-span-2 flex justify-between items-center p-2">
+          {form.status === "PROPOSAL" && (
+            <Badge
+              label="Luận văn đã được giảng viên hướng dẫn đề xuất. Bạn hãy xác nhận thực hiện hoặc từ chối đề xuất này."
+              icon={Info}
+              size="md"
+              variant="warning"
+            />
+          )}
 
-          <select
-            value={form.status}
-            onChange={(e) => handleChange("status", e.target.value)}
-            className="
-              mt-1 
-              w-full 
-              border 
-              border-gray-300
-              dark:border-gray-600
-              rounded-lg 
-              px-3 
-              py-2 
-              text-sm
-              bg-white
-              dark:bg-gray-800
-              text-gray-800
-              dark:text-gray-100
-            "
-          >
-            <option value="PROPOSAL">Draft</option>
-            <option value="IN_PROGRESS">In Progress</option>
-            <option value="SUBMITTED">Submitted</option>
-            <option value="APPROVED">Approved</option>
-          </select>
+          {form.status === "IN_PROGRESS" && (
+            <Badge
+              label="Luận văn đang trong quá trình thực hiện. Hãy tiếp tục làm việc chăm chỉ và cập nhật tiến độ thường xuyên."
+              icon={Info}
+              size="md"
+              variant="info"
+            />
+          )}
+
+          {form.status === "APPROVED" && (
+            <Badge
+              label="Luận văn đã được giảng viên hướng dẫn duyệt. Bước tiếp theo hãy nộp luận văn."
+              icon={Info}
+              size="md"
+              variant="success"
+            />
+          )}
+
+          {form.status === "GRADED" && (
+            <Badge
+              label="Luận văn đã được chấm điểm. Hãy xem lại kết quả và phản hồi nếu cần."
+              icon={Info}
+              size="md"
+              variant="success"
+            />
+          )}
+
+          {form.status === "PROPOSAL" && (
+            <div>
+              <Button
+                label="Chấp nhận thực hiện"
+                size="sm"
+                onClick={() => setShowConfirmModal(true)}
+              />
+              <Button
+                label="Từ chối"
+                variant="danger"
+                onClick={() => setShowRejectModal(true)}
+                className="ml-2"
+                size="sm"
+              />
+            </div>
+          )}
         </div>
 
         {/* PROGRESS */}
@@ -196,6 +235,29 @@ const ThesisOverviewPage = () => {
           onClick={handleSubmit}
         />
       </div>
+
+      <ConfirmModal
+        title="Xác nhận thực hiện luận văn"
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={async () => {
+          await progressThesis(id as string).unwrap();
+          setShowConfirmModal(false);
+        }}
+        open={showConfirmModal}
+        description="Bạn chắc chắn muốn thực hiện luận văn này?"
+      />
+      <ConfirmModal
+        title="Từ chối đề xuất luận văn"
+        onClose={() => setShowRejectModal(false)}
+        onConfirm={async () => {
+          await rejectThesis(id as string);
+          setShowRejectModal(false);
+          goToParentPath();
+        }}
+        open={showRejectModal}
+        description="Bạn chắc chắn muốn từ chối đề xuất luận văn này?"
+        type="danger"
+      />
     </div>
   );
 };

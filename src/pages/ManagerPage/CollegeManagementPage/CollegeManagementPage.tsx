@@ -1,303 +1,307 @@
-const MOCK_COLLEGES = [
-  {
-    id: "C1",
-    code: "UST-01",
-    name: "Đại học Công nghệ",
-    description: "Đào tạo kỹ thuật mũi nhọn",
-    faculties: [
-      {
-        id: "F1",
-        code: "F-IT",
-        name: "Khoa Công nghệ thông tin",
-        description: "Tập trung AI và Phần mềm",
-        departments: [
-          {
-            id: "D1",
-            code: "S-CS",
-            name: "Bộ môn Khoa học máy tính",
-            description: "Lý thuyết nền tảng",
-          },
-          {
-            id: "D2",
-            code: "S-SE",
-            name: "Bộ môn Kỹ thuật phần mềm",
-            description: "Quy trình phát triển",
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "C2",
-    code: "UEB-02",
-    name: "Đại học Kinh tế",
-    description: "Đào tạo quản lý và tài chính",
-    faculties: [],
-  },
-];
-import React, { useState } from "react";
+import { Building2, Edit, Plus, Trash2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import Button from "../../../components/UI/Button";
+import Modal from "../../../components/UI/Modal";
+import Input from "../../../components/UI/Input";
+import Textarea from "../../../components/UI/TextArea";
+import ConfirmModal from "../../../components/UI/ConfirmModal";
+import Loader from "../../../components/UI/Loader";
+import Badge from "../../../components/UI/Badge";
 import {
-  MdAdd,
-  MdEdit,
-  MdDelete,
-  MdKeyboardArrowDown,
-  MdKeyboardArrowRight,
-} from "react-icons/md";
-import { FaUniversity, FaBuilding, FaBook } from "react-icons/fa";
+  useAddCollegeMutation,
+  useDeleteCollegeMutation,
+  useGetCollegesQuery,
+  useUpdateCollegeMutation,
+} from "../../../services/orgApi";
+import { useAppDispatch } from "../../../app/hook";
+import { addToast } from "../../../features/notification/toastSlice";
 
-const CollegeManagement = () => {
-  const [data, setData] = useState(MOCK_COLLEGES);
-  const [expandedRows, setExpandedRows] = useState(new Set());
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalConfig, setModalConfig] = useState({
-    type: "",
-    action: "add",
-    target: null,
-    parentId: null,
-  });
-
-  // Toggle đóng mở hàng
-  const toggleRow = (id) => {
-    const newExpandedRows = new Set(expandedRows);
-    if (newExpandedRows.has(id)) newExpandedRows.delete(id);
-    else newExpandedRows.add(id);
-    setExpandedRows(newExpandedRows);
-  };
-
-  // Mở modal (Dùng chung cho cả thêm/sửa các cấp)
-  const openModal = (type, action, target = null, parentId = null) => {
-    setModalConfig({ type, action, target, parentId });
-    setIsModalOpen(true);
-  };
-
-  return (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      {/* Header */}
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
-            Danh sách Trường / Cơ sở
-          </h1>
-          <p className="text-sm text-gray-500">
-            Quản lý cấu trúc phân cấp các đơn vị đào tạo
-          </p>
-        </div>
-        <button
-          onClick={() => openModal("Trường", "add")}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-        >
-          <MdAdd size={20} /> Thêm Trường mới
-        </button>
-      </div>
-
-      {/* Table Container */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead className="bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-300 text-sm uppercase">
-            <tr>
-              <th className="px-6 py-4">Tên đơn vị / Mã</th>
-              <th className="px-6 py-4">Mô tả</th>
-              <th className="px-6 py-4 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-            {data.map((college) => (
-              <React.Fragment key={college.id}>
-                {/* Trường Row */}
-                <RowItem
-                  item={college}
-                  level={0}
-                  icon={<FaUniversity className="text-blue-500" />}
-                  onToggle={() => toggleRow(college.id)}
-                  isExpanded={expandedRows.has(college.id)}
-                  onAdd={() => openModal("Khoa", "add", null, college.id)}
-                  onEdit={() => openModal("Trường", "edit", college)}
-                />
-
-                {/* Khoa Rows */}
-                {expandedRows.has(college.id) &&
-                  college.faculties.map((faculty) => (
-                    <React.Fragment key={faculty.id}>
-                      <RowItem
-                        item={faculty}
-                        level={1}
-                        icon={<FaBuilding className="text-emerald-500" />}
-                        onToggle={() => toggleRow(faculty.id)}
-                        isExpanded={expandedRows.has(faculty.id)}
-                        onAdd={() =>
-                          openModal("Bộ môn", "add", null, faculty.id)
-                        }
-                        onEdit={() => openModal("Khoa", "edit", faculty)}
-                      />
-
-                      {/* Bộ môn Rows */}
-                      {expandedRows.has(faculty.id) &&
-                        faculty.departments.map((dept) => (
-                          <RowItem
-                            key={dept.id}
-                            item={dept}
-                            level={2}
-                            icon={<FaBook className="text-amber-500" />}
-                            onEdit={() => openModal("Bộ môn", "edit", dept)}
-                          />
-                        ))}
-                    </React.Fragment>
-                  ))}
-              </React.Fragment>
-            ))}
-          </tbody>
-        </table>
-
-        {/* Pagination Dummy */}
-        <div className="px-6 py-4 bg-gray-50 dark:bg-gray-700 flex justify-between items-center text-sm text-gray-500">
-          <span>Hiển thị 1-10 trên 25 trường</span>
-          <div className="flex gap-2">
-            <button className="px-3 py-1 border rounded hover:bg-white transition">
-              Trước
-            </button>
-            <button className="px-3 py-1 border rounded bg-blue-600 text-white">
-              1
-            </button>
-            <button className="px-3 py-1 border rounded hover:bg-white transition">
-              Sau
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {isModalOpen && (
-        <CrudModal config={modalConfig} onClose={() => setIsModalOpen(false)} />
-      )}
-    </div>
-  );
+type CollegeItem = {
+  id: string;
+  code: string;
+  name: string;
+  description?: string;
 };
 
-// Component con cho từng hàng để tái sử dụng
-const RowItem = ({
-  item,
-  level,
-  icon,
-  onToggle,
-  isExpanded,
-  onAdd,
-  onEdit,
-}) => {
-  const indentClass = level === 1 ? "pl-12" : level === 2 ? "pl-20" : "pl-6";
+type CollegeFormState = {
+  code: string;
+  name: string;
+  description: string;
+};
+
+const emptyForm: CollegeFormState = {
+  code: "",
+  name: "",
+  description: "",
+};
+
+const CollegeManagementPage = () => {
+  const dispatch = useAppDispatch();
+
+  const { data, isLoading } = useGetCollegesQuery();
+  const colleges = useMemo<CollegeItem[]>(() => data?.data || [], [data]);
+
+  const [addCollege, { isLoading: adding }] = useAddCollegeMutation();
+  const [updateCollege, { isLoading: updating }] = useUpdateCollegeMutation();
+  const [deleteCollege, { isLoading: deleting }] = useDeleteCollegeMutation();
+
+  const [openForm, setOpenForm] = useState(false);
+  const [editingCollege, setEditingCollege] = useState<CollegeItem | null>(
+    null,
+  );
+  const [deletingCollege, setDeletingCollege] = useState<CollegeItem | null>(
+    null,
+  );
+  const [form, setForm] = useState<CollegeFormState>(emptyForm);
+
+  const submitting = adding || updating;
+
+  const openCreate = () => {
+    setEditingCollege(null);
+    setForm(emptyForm);
+    setOpenForm(true);
+  };
+
+  const openEdit = (college: CollegeItem) => {
+    setEditingCollege(college);
+    setForm({
+      code: college.code || "",
+      name: college.name || "",
+      description: college.description || "",
+    });
+    setOpenForm(true);
+  };
+
+  const validate = () => {
+    if (!form.name.trim()) {
+      dispatch(
+        addToast({ type: "warning", message: "Vui lòng nhập tên trường" }),
+      );
+      return false;
+    }
+
+    if (!form.code.trim()) {
+      dispatch(
+        addToast({ type: "warning", message: "Vui lòng nhập mã trường" }),
+      );
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSave = async () => {
+    if (!validate()) return;
+
+    const payload = {
+      code: form.code.trim(),
+      name: form.name.trim(),
+      description: form.description.trim(),
+    };
+
+    try {
+      if (editingCollege) {
+        await updateCollege({ id: editingCollege.id, data: payload }).unwrap();
+        dispatch(
+          addToast({ type: "success", message: "Cập nhật trường thành công" }),
+        );
+      } else {
+        await addCollege(payload).unwrap();
+        dispatch(
+          addToast({ type: "success", message: "Thêm trường thành công" }),
+        );
+      }
+
+      setOpenForm(false);
+      setEditingCollege(null);
+      setForm(emptyForm);
+    } catch {
+      dispatch(
+        addToast({
+          type: "error",
+          message: editingCollege
+            ? "Không thể cập nhật trường"
+            : "Không thể thêm trường",
+        }),
+      );
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deletingCollege) return;
+
+    try {
+      await deleteCollege(deletingCollege.id).unwrap();
+      dispatch(addToast({ type: "success", message: "Xóa trường thành công" }));
+      setDeletingCollege(null);
+    } catch {
+      dispatch(
+        addToast({
+          type: "error",
+          message: "Không thể xóa trường. Có thể đang được sử dụng.",
+        }),
+      );
+    }
+  };
+
+  if (isLoading) return <Loader />;
 
   return (
-    <tr
-      className={`${level === 0 ? "bg-white font-semibold" : "bg-gray-50/50"} hover:bg-blue-50/50 dark:hover:bg-gray-700/50 transition`}
-    >
-      <td className={`px-6 py-4 flex items-center gap-3 ${indentClass}`}>
-        {level < 2 && (
-          <button onClick={onToggle} className="text-gray-400">
-            {isExpanded ? (
-              <MdKeyboardArrowDown size={20} />
-            ) : (
-              <MdKeyboardArrowRight size={20} />
-            )}
-          </button>
+    <div className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-6 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-950/40 text-blue-600 dark:text-blue-300">
+            <Building2 />
+          </div>
+
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Quản lý trường
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Hiển thị, thêm, sửa, xóa danh sách trường trong tổ chức
+            </p>
+          </div>
+        </div>
+
+        <Button
+          icon={Plus}
+          label="Thêm trường"
+          size="sm"
+          onClick={openCreate}
+        />
+      </div>
+
+      <p className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+        Danh sách trường
+      </p>
+
+      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden">
+        {colleges.length > 0 ? (
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border-b border-gray-300 dark:border-gray-700">
+              <tr>
+                <th className="px-6 py-3 text-left font-medium">Mã trường</th>
+                <th className="px-6 py-3 text-left font-medium">Tên trường</th>
+                <th className="px-6 py-3 text-left font-medium">Mô tả</th>
+                <th className="px-6 py-3 text-center font-medium">Thao tác</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {colleges.map((college) => (
+                <tr
+                  key={college.id}
+                  className="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition"
+                >
+                  <td className="px-6 py-4 font-medium text-gray-900 dark:text-gray-100">
+                    {college.code}
+                  </td>
+                  <td className="px-6 py-4 text-gray-800 dark:text-gray-200">
+                    {college.name}
+                  </td>
+                  <td className="px-6 py-4 text-gray-500 dark:text-gray-400">
+                    {college.description || "-"}
+                  </td>
+                  <td className="px-6 py-4 text-right space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      icon={Edit}
+                      onClick={() => openEdit(college)}
+                    />
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      icon={Trash2}
+                      onClick={() => setDeletingCollege(college)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <div className="flex items-center justify-center h-40">
+            <Badge label="Chưa có trường nào" variant="outline" />
+          </div>
         )}
-        {icon}
-        <div>
-          <div className="text-gray-800 dark:text-gray-200">{item.name}</div>
-          <div className="text-xs text-gray-400 font-mono">{item.code}</div>
-        </div>
-      </td>
-      <td className="px-6 py-4 text-sm text-gray-500 max-w-xs truncate">
-        {item.description}
-      </td>
-      <td className="px-6 py-4 text-right">
-        <div className="flex justify-end gap-2">
-          {onAdd && (
-            <button
-              onClick={onAdd}
-              className="p-1.5 text-blue-600 hover:bg-blue-100 rounded"
-              title="Thêm cấp con"
-            >
-              <MdAdd size={18} />
-            </button>
-          )}
-          <button
-            onClick={onEdit}
-            className="p-1.5 text-amber-600 hover:bg-amber-100 rounded"
-          >
-            <MdEdit size={18} />
-          </button>
-          <button className="p-1.5 text-red-600 hover:bg-red-100 rounded">
-            <MdDelete size={18} />
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-};
-
-// Form Modal dùng chung
-const CrudModal = ({ config, onClose }) => {
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white dark:bg-gray-800 rounded-2xl w-full max-w-md shadow-2xl">
-        <div className="p-6 border-b dark:border-gray-700">
-          <h3 className="text-xl font-bold text-gray-800 dark:text-white">
-            {config.action === "add"
-              ? `Thêm mới ${config.type}`
-              : `Chỉnh sửa ${config.type}`}
-          </h3>
-        </div>
-        <form className="p-6 space-y-4" onSubmit={(e) => e.preventDefault()}>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Mã {config.type}
-            </label>
-            <input
-              type="text"
-              defaultValue={config.target?.code}
-              placeholder="Ví dụ: UST-01"
-              className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Tên {config.type}
-            </label>
-            <input
-              type="text"
-              defaultValue={config.target?.name}
-              placeholder={`Tên ${config.type.toLowerCase()}...`}
-              className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Mô tả
-            </label>
-            <textarea
-              rows="3"
-              defaultValue={config.target?.description}
-              className="w-full px-4 py-2 rounded-lg border dark:bg-gray-700 dark:border-gray-600 focus:ring-2 focus:ring-blue-500 outline-none transition"
-            ></textarea>
-          </div>
-
-          <div className="flex justify-end gap-3 mt-6">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition"
-            >
-              Hủy
-            </button>
-            <button
-              type="submit"
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-lg shadow-blue-500/30 transition"
-            >
-              Lưu thay đổi
-            </button>
-          </div>
-        </form>
       </div>
+
+      <Modal
+        open={openForm}
+        onClose={() => {
+          setOpenForm(false);
+          setEditingCollege(null);
+        }}
+        width="max-w-xl"
+      >
+        <div className="space-y-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            {editingCollege ? "Cập nhật trường" : "Thêm trường"}
+          </h2>
+
+          <Input
+            label="Mã trường"
+            value={form.code}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, code: e.target.value }))
+            }
+            placeholder="VD: DCT"
+          />
+
+          <Input
+            label="Tên trường"
+            value={form.name}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, name: e.target.value }))
+            }
+            placeholder="Nhập tên trường"
+          />
+
+          <Textarea
+            label="Mô tả"
+            rows={4}
+            value={form.description}
+            onChange={(e) =>
+              setForm((prev) => ({ ...prev, description: e.target.value }))
+            }
+            placeholder="Nhập mô tả"
+          />
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              label="Hủy"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setOpenForm(false);
+                setEditingCollege(null);
+              }}
+            />
+            <Button
+              label={editingCollege ? "Cập nhật" : "Tạo mới"}
+              size="sm"
+              onClick={handleSave}
+              loading={submitting}
+            />
+          </div>
+        </div>
+      </Modal>
+
+      <ConfirmModal
+        open={Boolean(deletingCollege)}
+        onClose={() => setDeletingCollege(null)}
+        onConfirm={handleDelete}
+        type="danger"
+        loading={deleting}
+        title="Xác nhận xóa trường"
+        description={`Bạn có chắc muốn xóa ${deletingCollege?.name || "trường này"}?`}
+        confirmText="Xóa"
+        cancelText="Hủy"
+      />
     </div>
   );
 };
 
-export default CollegeManagement;
+export default CollegeManagementPage;

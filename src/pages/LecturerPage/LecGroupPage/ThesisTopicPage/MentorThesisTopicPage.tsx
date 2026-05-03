@@ -1,67 +1,17 @@
-import { useState } from "react";
-import { Search, Plus } from "lucide-react";
+import { useState, useMemo, useEffect } from "react";
+import { Copy, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 import Button from "../../../../components/UI/Button";
-import Badge from "../../../../components/UI/Badge";
 import { useGetGroupTopicsQuery } from "../../../../services/groupApi";
 import { useParams } from "react-router-dom";
 import TopicFormModal from "./TopicFormModal";
 import type { TopicResponse } from "../../../../types/group";
 import TopicCard from "./TopicCard";
 import ConfirmModal from "./ConfirmModal";
+import Input from "../../../../components/UI/Input";
+import EmptyState from "../../../../components/UI/EmptyState";
+import MemberListModal from "./MemberListModal";
 
-type TopicStatus = "DRAFT" | "OPEN" | "IN_PROGRESS" | "COMPLETED";
-
-interface ThesisTopic {
-  id: string;
-  title: string;
-  description: string;
-  maxStudents: number;
-  currentStudents: number;
-  deadline: string;
-  status: TopicStatus;
-}
-
-const mockTopics: ThesisTopic[] = [
-  {
-    id: "1",
-    title: "Xây dựng hệ thống quản lý luận văn tích hợp AI",
-    description:
-      "Phát triển nền tảng quản lý luận văn sử dụng Spring Boot, React và tích hợp Chatbot AI.",
-    maxStudents: 3,
-    currentStudents: 2,
-    deadline: "30/06/2026",
-    status: "IN_PROGRESS",
-  },
-  {
-    id: "2",
-    title: "Hệ thống phát hiện Code Clone bằng Deep Learning",
-    description:
-      "Nghiên cứu và xây dựng mô hình phát hiện trùng lặp mã nguồn sử dụng PyTorch.",
-    maxStudents: 2,
-    currentStudents: 2,
-    deadline: "15/07/2026",
-    status: "OPEN",
-  },
-  {
-    id: "3",
-    title: "Xây dựng nền tảng BPMN Workflow Engine",
-    description:
-      "Thiết kế hệ thống quản lý quy trình nghiệp vụ dựa trên BPMN và Camunda.",
-    maxStudents: 3,
-    currentStudents: 1,
-    deadline: "01/08/2026",
-    status: "DRAFT",
-  },
-  {
-    id: "4",
-    title: "Phân tích dữ liệu giáo dục bằng Machine Learning",
-    description: "Ứng dụng ML để phân tích hiệu suất học tập của sinh viên.",
-    maxStudents: 2,
-    currentStudents: 2,
-    deadline: "01/05/2026",
-    status: "COMPLETED",
-  },
-];
+const ITEMS_PER_PAGE = 9;
 
 const MentorThesisTopicPage = () => {
   const { ["group-id"]: id } = useParams();
@@ -70,137 +20,175 @@ const MentorThesisTopicPage = () => {
   const topics = topicsResponse?.data || [];
   const [openTopicModal, setOpenTopicModal] = useState(false);
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
-
   const [editingTopic, setEditingTopic] = useState<TopicResponse | null>(null);
   const [deletingTopic, setDeletingTopic] = useState<TopicResponse | null>(
     null,
   );
 
-  const [filter, setFilter] = useState<TopicStatus | "ALL">("ALL");
+  const [openAssignModal, setOpenAssignModal] = useState(false);
+  const [assigningTopic, setAssigningTopic] = useState<TopicResponse | null>(
+    null,
+  );
+
   const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const filteredTopics = topics.filter((topic) => {
-    const matchStatus = filter === "ALL" || topic.status === filter;
-    const matchSearch = topic.title
-      .toLowerCase()
-      .includes(search.toLowerCase());
+  // --- LOGIC LỌC & PHÂN TRANG ---
 
-    return matchStatus && matchSearch;
-  });
+  // Chỉ lọc theo Search
+  const allFilteredTopics = useMemo(() => {
+    return topics.filter((topic) =>
+      topic.title.toLowerCase().includes(search.toLowerCase()),
+    );
+  }, [topics, search]);
+
+  const paginatedTopics = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return allFilteredTopics.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [allFilteredTopics, currentPage]);
+
+  const totalPages = Math.ceil(allFilteredTopics.length / ITEMS_PER_PAGE);
+
+  // Reset trang khi tìm kiếm
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   return (
-    <div className="bg-white border border-gray-200 shadow rounded-2xl p-6">
+    <div className="mt-6 rounded-3xl border border-gray-200/80 bg-white/95 p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900/95">
       {/* HEADER */}
-      <div className="mb-6 flex justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Quản lý đề tài luận văn
-          </h1>
-          <p className="text-gray-500">
-            Danh sách các đề tài bạn đang hướng dẫn
-          </p>
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <Copy size={24} />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Quản lý đề tài luận văn
+            </h1>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Tổng số {allFilteredTopics.length} đề tài được tìm thấy
+            </p>
+          </div>
         </div>
-        <div>
-          <Button
-            onClick={() => {
-              {
-                setEditingTopic(null);
-                setOpenTopicModal(true);
-              }
-            }}
-            size="sm"
-            icon={Plus}
-            label="Thêm chủ đề"
-            variant="outline"
-          />
-        </div>
+        <Button
+          onClick={() => {
+            setEditingTopic(null);
+            setOpenTopicModal(true);
+          }}
+          size="sm"
+          icon={Plus}
+          label="Thêm chủ đề"
+          variant="outline-primary"
+        />
       </div>
 
-      {/* FILTER + SEARCH */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-        <div className="flex gap-2 flex-wrap">
-          <Badge
-            label="Tất cả"
-            onClick={() => setFilter("ALL")}
-            className={filter === "ALL" ? "bg-blue-600 text-white" : ""}
-          />
-          <Badge
-            label="Bản nháp"
-            onClick={() => setFilter("DRAFT")}
-            className={filter === "DRAFT" ? "bg-gray-600 text-white" : ""}
-          />
-          <Badge
-            label="Đang mở"
-            onClick={() => setFilter("OPEN")}
-            className={filter === "OPEN" ? "bg-blue-600 text-white" : ""}
-          />
-          <Badge
-            label="Đang thực hiện"
-            onClick={() => setFilter("IN_PROGRESS")}
-            className={
-              filter === "IN_PROGRESS" ? "bg-yellow-500 text-white" : ""
-            }
-          />
-          <Badge
-            label="Hoàn thành"
-            onClick={() => setFilter("COMPLETED")}
-            className={filter === "COMPLETED" ? "bg-green-600 text-white" : ""}
-          />
-        </div>
-
-        <div className="relative w-full md:w-72">
-          <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Tìm kiếm đề tài..."
+      {/* SEARCH BAR (Đã bỏ thanh Status Badge) */}
+      <div className="mb-6">
+        <div className="max-w-md">
+          <Input
+            placeholder="Tìm kiếm theo tiêu đề đề tài..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>
       </div>
 
       {/* TOPIC LIST */}
-      <div className="grid gap-4">
-        {filteredTopics.length === 0 ? (
-          <div className="text-center text-gray-400 py-10">
-            Không có đề tài phù hợp
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+        {paginatedTopics.length === 0 ? (
+          <div className="col-span-3">
+            <EmptyState
+              icon={Copy}
+              title="Chưa có đề tài"
+              description="Thêm đề tài mới để bắt đầu."
+              action={
+                <Button
+                  onClick={() => {
+                    setEditingTopic(null);
+                    setOpenTopicModal(true);
+                  }}
+                  size="sm"
+                  icon={Plus}
+                  label="Thêm đề tài"
+                />
+              }
+            />
           </div>
         ) : (
-          filteredTopics.map((topic) => (
+          paginatedTopics.map((topic) => (
             <TopicCard
               key={topic.id}
               topic={topic}
               onEdit={() => {
-                {
-                  setEditingTopic(topic);
-                  setOpenTopicModal(true);
-                }
+                setEditingTopic(topic);
+                setOpenTopicModal(true);
               }}
               onDelete={() => {
-                {
-                  setDeletingTopic(topic);
-                  setOpenConfirmModal(true);
-                }
+                setDeletingTopic(topic);
+                setOpenConfirmModal(true);
+              }}
+              onAssignMembers={() => {
+                setAssigningTopic(topic);
+                setOpenAssignModal(true);
               }}
             />
           ))
         )}
       </div>
+
+      {/* PAGINATION UI */}
+      {totalPages > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-2">
+          <button
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((prev) => prev - 1)}
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white transition hover:bg-gray-50 disabled:opacity-30 dark:border-gray-700 dark:bg-gray-800"
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <div className="flex items-center gap-1">
+            {[...Array(totalPages)].map((_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => setCurrentPage(i + 1)}
+                className={`h-9 w-9 rounded-xl text-sm font-medium transition ${
+                  currentPage === i + 1
+                    ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
+                    : "text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800"
+                }`}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+
+          <button
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((prev) => prev + 1)}
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-gray-200 bg-white transition hover:bg-gray-50 disabled:opacity-30 dark:border-gray-700 dark:bg-gray-800"
+          >
+            <ChevronRight size={18} />
+          </button>
+        </div>
+      )}
+
       {/* Modals */}
       <TopicFormModal
         open={openTopicModal}
-        onClose={() => {
-          {
-            setOpenTopicModal(false);
-          }
-        }}
+        onClose={() => setOpenTopicModal(false)}
         initialData={editingTopic}
       />
       <ConfirmModal
         initialData={deletingTopic}
         open={openConfirmModal}
         onClose={() => setOpenConfirmModal(false)}
+      />
+      <MemberListModal
+        open={openAssignModal}
+        onClose={() => setOpenAssignModal(false)}
+        topic={assigningTopic}
       />
     </div>
   );

@@ -1,24 +1,29 @@
-import {
-  LuBookCopy,
-  LuCalendarClock,
-  LuMessagesSquare,
-  LuFolderKanban,
-} from "react-icons/lu";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import NavItem from "../../../components/header/NavItem";
 import { useGetGroupByIdQuery } from "../../../services/groupApi";
 import Loader from "../../../components/UI/Loader";
 import { FaUsers } from "react-icons/fa";
 import Button from "../../../components/UI/Button";
-import { Edit } from "lucide-react";
-import { MdAssignment } from "react-icons/md";
+import {
+  CalendarClock,
+  ClipboardList,
+  Edit,
+  FileText,
+  FolderKanban,
+  GraduationCap,
+  MessageCircle,
+  MoveLeft,
+  Users,
+} from "lucide-react";
 
 const LecTopbar = () => {
+  const navigate = useNavigate();
   const { ["org-code"]: code, ["group-id"]: id } = useParams();
   const { data: groupResponse, isLoading } = useGetGroupByIdQuery(id || "");
   const group = groupResponse?.data;
 
   const basePath = `/${code}/l/group/${id}`;
+  const groupListPath = `/${code}/l/group`;
 
   if (isLoading) {
     return (
@@ -32,6 +37,16 @@ const LecTopbar = () => {
     <div className="space-y-6">
       {/* ===== GROUP HEADER ===== */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 pt-6 rounded-2xl shadow-sm">
+        <div className="px-6 pb-4 border-b border-gray-100 dark:border-gray-800">
+          <Button
+            label="Quay lại nhóm"
+            icon={MoveLeft}
+            size="sm"
+            variant="ghost"
+            onClick={() => navigate(groupListPath)}
+          />
+        </div>
+
         <div className="flex justify-between px-6">
           <div className="flex items-center gap-5">
             {/* Avatar group */}
@@ -69,48 +84,60 @@ const LecTopbar = () => {
         <div className="mt-6 pb-2 md:px-4">
           <nav
             className="
-            flex flex-wrap
-            gap-2 md:gap-6
-            justify-center md:justify-start
-            border-t border-gray-100 dark:border-gray-800
-            pt-4
-            "
+      flex flex-wrap
+      gap-2 md:gap-6
+      justify-center md:justify-start
+      border-t border-gray-100 dark:border-gray-800
+      pt-4
+    "
           >
             <NavItem
               to={`${basePath}/assignments`}
               label="Nhiệm vụ"
-              icon={MdAssignment}
+              icon={ClipboardList}
               borderPosition="bottom"
             />
 
             <NavItem
               to={`${basePath}/meetings`}
-              label="Lịch họp"
-              icon={LuCalendarClock}
+              label="Họp nhóm"
+              icon={CalendarClock}
+              borderPosition="bottom"
             />
 
             <NavItem
               to={`${basePath}/chat`}
               label="Trò chuyện"
-              icon={LuMessagesSquare}
+              icon={MessageCircle}
+              borderPosition="bottom"
             />
 
             <NavItem
               to={`${basePath}/documents`}
               label="Tài liệu"
-              icon={LuBookCopy}
+              icon={FileText}
+              borderPosition="bottom"
             />
 
             <NavItem
               to={`${basePath}/members`}
               label="Thành viên"
-              icon={FaUsers}
+              icon={Users}
+              borderPosition="bottom"
             />
 
             <NavItem
               to={`${basePath}/topics`}
               label="Đề tài"
-              icon={LuFolderKanban}
+              icon={FolderKanban}
+              borderPosition="bottom"
+            />
+
+            <NavItem
+              to={`${basePath}/theses`}
+              label="Luận văn"
+              icon={GraduationCap}
+              borderPosition="bottom"
             />
           </nav>
         </div>

@@ -36,15 +36,17 @@ const ConfirmModal = ({
       <div className="p-2 space-y-5">
         {/* Icon + Title */}
         <div className="flex items-start gap-4">
-          <div className="p-3 rounded-full bg-red-100 text-red-600">
+          <div className="rounded-full border border-red-200 bg-red-50 p-3 text-red-600 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
             <AlertTriangle size={22} />
           </div>
 
           <div>
-            <h2 className="text-lg font-semibold text-gray-800">Xóa chủ đề</h2>
-            <p className="text-sm text-gray-500 mt-1">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+              Xóa chủ đề
+            </h2>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               Bạn có chắc chắn muốn xóa chủ đề <br />
-              <span className="font-medium text-gray-700">
+              <span className="font-medium text-gray-700 dark:text-gray-200">
                 {initialData?.title}
               </span>
               ?
@@ -53,7 +55,7 @@ const ConfirmModal = ({
         </div>
 
         {/* Warning text */}
-        <div className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-lg p-3">
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-600 dark:border-red-800 dark:bg-red-950/40 dark:text-red-300">
           Hành động này không thể hoàn tác.
         </div>
 
@@ -69,7 +71,7 @@ const ConfirmModal = ({
             label={isLoading ? "Đang xóa..." : "Xác nhận"}
             onClick={handleDelete}
             disabled={isLoading}
-            className="bg-red-600 hover:bg-red-700 text-white"
+            variant="danger"
           />
         </div>
       </div>

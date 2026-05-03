@@ -22,7 +22,7 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
   const [createStudent] = useAddStudentMutation();
   const [updateStudent] = useUpdateStudentMutation();
 
-  const { data: programData } = useGetProgramsQuery();
+  const { data: programData } = useGetProgramsQuery({});
   const { data: coursesData } = useGetCoursesQuery();
   const courses = coursesData?.data || [];
   const programs = programData?.data || [];
@@ -93,13 +93,15 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
         }).unwrap();
       }
       onClose();
-    } catch (e) {}
+    } catch (e) {
+      console.log(e);
+    }
   };
 
   return (
     <Modal open={open} onClose={onClose} width="max-w-2xl">
-      <div className="w-full max-w-2xl rounded-xl bg-white p-2">
-        <h2 className="mb-4 text-lg font-semibold">
+      <div className="w-full max-w-2xl rounded-xl bg-white p-2 dark:bg-gray-900">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900 dark:text-gray-100">
           {student ? "Cập nhật sinh viên" : "Thêm sinh viên"}
         </h2>
 
@@ -110,6 +112,7 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
             onChange={handleChange}
             label="Mã sinh viên"
             placeholder="Nhập mã sinh viên"
+            className="dark:bg-gray-700 dark:text-gray-100"
           />
           <Input
             name="fullName"
@@ -117,6 +120,7 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
             onChange={handleChange}
             label="Họ và tên"
             placeholder="Nhập họ tên"
+            className="dark:bg-gray-700 dark:text-gray-100"
           />
           <Input
             name="dob"
@@ -124,25 +128,18 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
             onChange={handleChange}
             label="Ngày sinh"
             type="date"
+            className="dark:bg-gray-700 dark:text-gray-100"
           />
           <Select
             label="Giới tính"
             options={[
-              {
-                label: "Chọn giới tính",
-                value: "",
-              },
-              {
-                label: "Nam",
-                value: "MALE",
-              },
-              {
-                label: "Nữ",
-                value: "FEMALE",
-              },
+              { label: "Chọn giới tính", value: "" },
+              { label: "Nam", value: "MALE" },
+              { label: "Nữ", value: "FEMALE" },
             ]}
             value={form.gender}
             onChange={handleChange}
+            className="dark:bg-gray-700 dark:text-gray-100"
           />
           <Input
             label="Email"
@@ -150,6 +147,7 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
             value={form.email}
             onChange={handleChange}
             placeholder="Nhập email"
+            className="dark:bg-gray-700 dark:text-gray-100"
           />
           <Input
             label="Password"
@@ -157,6 +155,7 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
             value={form.password}
             onChange={handleChange}
             placeholder="Nhập mật khẩu"
+            className="dark:bg-gray-700 dark:text-gray-100"
           />
           <Input
             label="Số điện thoại"
@@ -164,6 +163,7 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
             value={form.phone}
             onChange={handleChange}
             placeholder="Nhập số điện thoại"
+            className="dark:bg-gray-700 dark:text-gray-100"
           />
           <div className="col-span-2">
             <Textarea
@@ -171,15 +171,13 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
               name="address"
               value={form.address}
               onChange={handleChange}
+              className="dark:bg-gray-700 dark:text-gray-100"
             />
           </div>
           <Select
             label="Chương trình"
             options={[
-              {
-                label: "Chọn chương trình",
-                value: "",
-              },
+              { label: "Chọn chương trình", value: "" },
               ...programs.map((program: any) => ({
                 label: program.name,
                 value: program.id,
@@ -188,6 +186,7 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
             onChange={handleChange}
             name="programId"
             value={form.programId}
+            className="dark:bg-gray-700 dark:text-gray-100"
           />
           <Select
             label="Khóa"
@@ -201,16 +200,20 @@ const StudentFormModal = ({ open, student, onClose }: Props) => {
             ]}
             onChange={handleChange}
             value={form.courseId}
+            className="dark:bg-gray-700 dark:text-gray-100"
           />
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 text-sm">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 text-sm text-gray-700 dark:text-gray-200"
+          >
             Hủy
           </button>
           <button
             onClick={handleSubmit}
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm text-white dark:bg-blue-500"
           >
             Lưu
           </button>

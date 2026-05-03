@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useLoginMutation } from "../../services/authApi";
 import { useAppDispatch } from "../../app/hook";
 import { loginSuccess } from "../../features/auth/authSlice";
-import { addToast } from "../../features/notification/notificationSlice";
+import { addToast } from "../../features/notification/toastSlice";
 
 const LoginPage = () => {
   const dispatch = useAppDispatch();
@@ -30,12 +30,31 @@ const LoginPage = () => {
         username: email,
         password,
       }).unwrap();
-      dispatch(loginSuccess({ token: data.acessToken }));
-      if (data.role === "ADMIN") {
-        navigate("/a");
-      } else {
-        navigate(`/${data.code}/m`);
+
+      const accessToken = data?.accessToken ?? data?.acessToken;
+      const orgCode = data?.code;
+      const role = data?.role;
+
+      if (!accessToken) {
+        throw new Error("Missing access token");
       }
+
+      dispatch(loginSuccess({ token: accessToken }));
+
+      if (role === "ADMIN") {
+        navigate("/a", { replace: true });
+      } else if (orgCode && role === "MANAGER") {
+        navigate(`/${orgCode}/m`, { replace: true });
+      } else if (orgCode && role === "LECTURER") {
+        navigate(`/${orgCode}/l`, { replace: true });
+      } else if (orgCode && role === "STUDENT") {
+        navigate(`/${orgCode}/s`, { replace: true });
+      } else if (orgCode) {
+        navigate(`/${orgCode}/login`, { replace: true });
+      } else {
+        navigate("/login", { replace: true });
+      }
+
       dispatch(
         addToast({
           type: "success",
@@ -43,7 +62,12 @@ const LoginPage = () => {
         }),
       );
     } catch (error: any) {
-      dispatch(addToast({ type: "error", message: "Đăng nhập thất bại" }));
+      dispatch(
+        addToast({
+          type: "error",
+          message: "Đăng nhập thất bại, email hoặc mật khẩu không đúng!",
+        }),
+      );
     }
   };
   return (

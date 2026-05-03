@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { getColor } from "../../../../utils/getColor";
-import { getInitials } from "../../../../utils/getInitials";
+import AvatarInitial from "../../../../components/UI/AvatarInitial";
 import { truncateWords } from "../../../../utils/truncateWord";
 import type { CouncilResponse } from "../../../../types/council";
 
@@ -91,16 +90,7 @@ const CouncilRow = ({ council, selected, onClick }: Props) => {
               </p>
               <div key={m.id} className="flex items-center gap-2.5 group/item">
                 {/* Avatar */}
-                <div
-                  className={`
-                  w-7 h-7 rounded-full flex items-center justify-center
-                  text-[11px] font-semibold text-white shrink-0
-                  ${getColor(name)}
-                  shadow-sm
-                `}
-                >
-                  {getInitials(name)}
-                </div>
+                <AvatarInitial fullName={name} size={28} />
 
                 {/* Name */}
                 <div className="text-gray-800 text-sm truncate font-semibold">

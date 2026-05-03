@@ -1,23 +1,26 @@
 import { useState } from "react";
 import { FaFileExcel, FaSearch } from "react-icons/fa";
 import { GrPowerReset } from "react-icons/gr";
-import { Plus, User, Users, UserSearch } from "lucide-react";
+import { Plus, User } from "lucide-react";
 
 import Button from "../../../components/UI/Button";
+import ConfirmModal from "../../../components/UI/ConfirmModal";
 import Input from "../../../components/UI/Input";
-import Select from "../../../components/UI/Select";
+import OrganizationUnitSelecter from "../../../components/common/UnitSelecter";
 
-import { useSearchLecturersQuery } from "../../../services/userApi";
+import {
+  useDeleteLecturerMutation,
+  useSearchLecturersQuery,
+} from "../../../services/userApi";
 import LecturerFormModal from "./LecturerFormModal";
 import LecturerRow from "./LecturerRow";
 import type { LecturerResponse } from "../../../types/lecturer";
-import ConfirmDeleteModal from "./ConfirmDeleteModal";
 import Badge from "../../../components/UI/Badge";
-import {
-  useGetCollegesQuery,
-  useGetDeparmentsQuery,
-  useGetFacultiesQuery,
-} from "../../../services/orgApi";
+import ExcelImportLecturerModal from "./ExcelImportLecturerModal";
+import { useAppDispatch } from "../../../app/hook";
+import { addToast } from "../../../features/notification/toastSlice";
+
+type UnitType = "COLLEGE" | "FACULTY" | "DEPARTMENT";
 
 const LecturerManagementPage = () => {
   const size = 5;
@@ -25,11 +28,15 @@ const LecturerManagementPage = () => {
   const [form, setForm] = useState({
     name: "",
     code: "",
-    email: "",
     collegeId: "",
     facultyId: "",
     departmentId: "",
   });
+  const [selectedUnit, setSelectedUnit] = useState<{
+    type: UnitType;
+    id: string | null;
+    name?: string;
+  } | null>(null);
 
   const [page, setPage] = useState(0);
 
@@ -46,6 +53,9 @@ const LecturerManagementPage = () => {
 
   const [openModal, setOpenModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openExcel, setOpenExcel] = useState(false);
+  const [deleteLecturer, { isLoading: isDeletingLecturer }] =
+    useDeleteLecturerMutation();
 
   const handleChange = (field: string, value: string) => {
     setForm((prev) => ({
@@ -58,37 +68,48 @@ const LecturerManagementPage = () => {
     setPage(0);
   };
 
-  const { data: collegesResponse } = useGetCollegesQuery();
-  const { data: facultiesResponse } = useGetFacultiesQuery();
-  const { data: departmentsResponse } = useGetDeparmentsQuery();
+  const dispatch = useAppDispatch();
 
-  const colleges = (collegesResponse?.data || []).map((college: any) => ({
-    value: college.id,
-    label: college.name,
-  }));
+  const handleUnitChange = (type: UnitType, unitId: string | null) => {
+    setSelectedUnit({ type, id: unitId });
 
-  const faculties = (facultiesResponse?.data || []).map((faculty: any) => ({
-    value: faculty.id,
-    label: faculty.name,
-  }));
-
-  const departments = (departmentsResponse?.data || []).map(
-    (department: any) => ({
-      value: department.id,
-      label: department.name,
-    }),
-  );
+    setForm((prev) => ({
+      ...prev,
+      collegeId: type === "COLLEGE" ? (unitId ?? "") : "",
+      facultyId: type === "FACULTY" ? (unitId ?? "") : "",
+      departmentId: type === "DEPARTMENT" ? (unitId ?? "") : "",
+    }));
+  };
 
   const handleReset = () => {
     setForm({
       name: "",
       code: "",
-      email: "",
       departmentId: "",
       facultyId: "",
       collegeId: "",
     });
+    setSelectedUnit(null);
     setPage(0);
+  };
+
+  const handleDeleteLecturer = async () => {
+    if (!lecturer) return;
+
+    try {
+      await deleteLecturer(lecturer.id).unwrap();
+      setOpenDeleteModal(false);
+      setLecturer(null);
+      dispatch(
+        addToast({
+          id: "",
+          type: "success",
+          message: "Xóa giảng viên thành công",
+        }),
+      );
+    } catch (error) {
+      dispatch(addToast({ id: "", type: "error", message: "Khoong" }));
+    }
   };
 
   return (
@@ -116,6 +137,7 @@ const LecturerManagementPage = () => {
             icon={FaFileExcel}
             variant="outline"
             size="sm"
+            onClick={() => setOpenExcel(true)}
           />
 
           <Button
@@ -131,13 +153,15 @@ const LecturerManagementPage = () => {
       </div>
 
       {/* SEARCH */}
-      <div className="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
-        <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200 mb-3">
-          <UserSearch size={20} />
-          <p className="text-lg font-semibold">Tìm kiếm giảng viên</p>
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gray-50 dark:bg-gray-800/50">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700/60 text-gray-700 dark:text-gray-300">
+          <User size={16} />
+          <p className="text-xs font-semibold uppercase tracking-wider">
+            Tìm kiếm giảng viên
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-4 p-4 items-end">
           <Input
             label="Mã giảng viên"
             size="sm"
@@ -152,60 +176,36 @@ const LecturerManagementPage = () => {
             onChange={(e) => handleChange("name", e.target.value)}
           />
 
-          <Input
-            label="Email"
+          <OrganizationUnitSelecter
             size="sm"
-            value={form.email}
-            onChange={(e) => handleChange("email", e.target.value)}
+            value={selectedUnit}
+            onChange={handleUnitChange}
+            showAllOption
+            width="100%"
           />
 
-          <Select
-            label="Trường"
-            options={[{ label: "Chọn trường", value: "" }, ...colleges]}
-            size="sm"
-            value={form.collegeId}
-            onChange={(e) => handleChange("collegeId", e.target.value)}
-          />
+          <div className="flex justify-end gap-3">
+            <Button
+              icon={GrPowerReset}
+              label="Xóa lọc"
+              size="sm"
+              variant="ghost"
+              className="border border-gray-300 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+              onClick={handleReset}
+            />
 
-          <Select
-            label="Khoa"
-            options={[{ label: "Chọn khoa", value: "" }, ...faculties]}
-            size="sm"
-            value={form.facultyId}
-            onChange={(e) => handleChange("facultyId", e.target.value)}
-          />
-
-          <Select
-            label="Bộ môn"
-            options={[{ label: "Chọn bộ môn", value: "" }, ...departments]}
-            size="sm"
-            value={form.departmentId}
-            onChange={(e) => handleChange("departmentId", e.target.value)}
-          />
-        </div>
-
-        <div className="flex justify-end gap-3 mt-4">
-          <Button
-            icon={GrPowerReset}
-            label="Xóa lọc"
-            size="sm"
-            variant="ghost"
-            className="border border-gray-300 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
-            onClick={handleReset}
-          />
-
-          <Button
-            icon={FaSearch}
-            label="Tìm kiếm"
-            size="sm"
-            onClick={handleSearch}
-          />
+            <Button
+              icon={FaSearch}
+              label="Tìm kiếm"
+              size="sm"
+              onClick={handleSearch}
+            />
+          </div>
         </div>
       </div>
 
       {/* TITLE */}
       <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200 px-2">
-        <Users size={20} />
         <p className="text-lg font-semibold">Danh sách giảng viên</p>
       </div>
 
@@ -287,10 +287,20 @@ const LecturerManagementPage = () => {
         onClose={() => setOpenModal(false)}
       />
 
-      <ConfirmDeleteModal
+      <ConfirmModal
         open={openDeleteModal}
         onClose={() => setOpenDeleteModal(false)}
-        lecturer={lecturer}
+        onConfirm={handleDeleteLecturer}
+        title={`Bạn có chắc chắn muốn xóa cán bộ ${lecturer?.fullName}?`}
+        description="Hành động này không thể hoàn tác!"
+        confirmText="Xóa"
+        type="danger"
+        loading={isDeletingLecturer}
+      />
+
+      <ExcelImportLecturerModal
+        open={openExcel}
+        onClose={() => setOpenExcel(false)}
       />
     </div>
   );

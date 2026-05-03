@@ -6,6 +6,7 @@ import { useLoginOrgMutation } from "../../services/authApi";
 import { useState } from "react";
 import { useAppDispatch } from "../../app/hook";
 import { loginSuccess } from "../../features/auth/authSlice";
+import { addToast } from "../../features/notification/toastSlice";
 
 const OrgLoginPage = () => {
   const { "org-code": orgCode } = useParams();
@@ -21,17 +22,28 @@ const OrgLoginPage = () => {
   const dispatch = useAppDispatch();
 
   const handleLogin = async () => {
-    const data = (
-      await loginOrg({
-        code: orgCode,
-        credentials: { username, password },
-      }).unwrap()
-    ).data;
+    try {
+      const data = (
+        await loginOrg({
+          code: orgCode,
+          credentials: { username, password },
+        }).unwrap()
+      ).data;
 
-    dispatch(loginSuccess({ token: data?.accessToken }));
+      dispatch(loginSuccess({ token: data?.accessToken }));
+      dispatch(addToast({ type: "success", message: "Đăng nhập thành công!" }));
 
-    if (data.role === "LECTURER") navigation(`/${orgCode}/l`);
-    if (data.role === "STUDENT") navigation(`/${orgCode}/s`);
+      if (data.role === "LECTURER") navigation(`/${orgCode}/l`);
+      if (data.role === "STUDENT") navigation(`/${orgCode}/s`);
+      if (data.role === "MANAGER") navigation(`/${orgCode}/m`);
+    } catch (error) {
+      dispatch(
+        addToast({
+          type: "error",
+          message: "Đăng nhập thất bại. Vui lòng kiểm tra lại.",
+        }),
+      );
+    }
   };
 
   return (

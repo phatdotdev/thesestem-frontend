@@ -1,32 +1,45 @@
-import { FiLogOut, FiEdit3, FiUsers } from "react-icons/fi";
-
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import NavItem from "../../components/header/NavItem";
-import Button from "../../components/UI/Button";
-import { useAppSelector } from "../../app/hook";
+import { useAppDispatch, useAppSelector } from "../../app/hook";
 import { FaGraduationCap, FaUserTie } from "react-icons/fa";
-import { FcGraduationCap } from "react-icons/fc";
 import { FaUserGroup } from "react-icons/fa6";
 import { MdTopic } from "react-icons/md";
+import { logout } from "../../features/auth/authSlice";
+import { useLogoutMutation } from "../../services/authApi";
+import LogoutButton from "../../components/UI/LogoutButton";
 
 const StdSidebar = () => {
   const { "org-code": orgCode } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useAppDispatch();
+  const [logoutRequest] = useLogoutMutation();
   const logoUrl = useAppSelector((state) => state.organization.logoUrl);
+
+  const handleLogout = async () => {
+    try {
+      await logoutRequest({}).unwrap();
+    } catch {
+    } finally {
+      dispatch(logout());
+      navigate(orgCode ? `/${orgCode}/login` : "/login", { replace: true });
+    }
+  };
 
   return (
     <aside
       className="
         flex flex-col
-        h-screen
-        w-20 md:w-64
+        h-dvh
+        w-16 sm:w-20 lg:w-64
+        overflow-x-hidden
         bg-white dark:bg-gray-950
         border-r border-gray-200 dark:border-gray-800
         shadow-sm
-        px-4 py-6
+        px-2 sm:px-3 lg:px-4 py-4 sm:py-5 lg:py-6
       "
     >
       {/* Logo */}
-      <div className="flex items-center justify-center lg:justify-start gap-4 pb-6 border-b border-gray-100 dark:border-gray-800">
+      <div className="flex items-center justify-center gap-3 border-b border-gray-100 pb-4 dark:border-gray-800 sm:pb-5 lg:justify-start lg:gap-4 lg:pb-6">
         <div className="h-12 w-12 rounded-xl flex items-center justify-center overflow-hidden">
           {logoUrl ? (
             <img
@@ -51,10 +64,10 @@ const StdSidebar = () => {
       </div>
 
       {/* Navigation */}
-      <nav className="flex flex-col gap-8 flex-1 mt-6">
+      <nav className="mt-4 flex flex-1 flex-col gap-6 overflow-x-hidden overflow-y-auto sm:mt-5 lg:mt-6 lg:gap-8">
         {/* Student */}
         <div>
-          <p className="hidden lg:block mb-3 text-[11px] tracking-widest font-semibold uppercase text-gray-400">
+          <p className="mb-2 hidden text-[11px] font-semibold uppercase tracking-widest text-gray-400 lg:mb-3 lg:block">
             Sinh viên
           </p>
 
@@ -69,7 +82,7 @@ const StdSidebar = () => {
 
         {/* Thesis */}
         <div>
-          <p className="hidden lg:block mb-3 text-[11px] tracking-widest font-semibold uppercase text-gray-400">
+          <p className="mb-2 hidden text-[11px] font-semibold uppercase tracking-widest text-gray-400 lg:mb-3 lg:block">
             Luận văn
           </p>
 
@@ -94,18 +107,8 @@ const StdSidebar = () => {
         </div>
 
         {/* Logout */}
-        <div className="mt-auto pt-6 border-t border-gray-100 dark:border-gray-800">
-          <Button
-            icon={FiLogOut}
-            label="Đăng xuất"
-            variant="ghost"
-            className="
-              w-full
-              justify-center lg:justify-start
-              text-red-500 hover:text-red-600
-              hover:bg-red-50 dark:hover:bg-red-900/20
-            "
-          />
+        <div className="mt-auto border-t border-gray-100 pt-4 dark:border-gray-800 sm:pt-5 lg:pt-6">
+          <LogoutButton onLogout={handleLogout} />
         </div>
       </nav>
     </aside>

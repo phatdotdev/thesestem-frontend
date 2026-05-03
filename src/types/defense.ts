@@ -1,6 +1,13 @@
 import type { CouncilMemberResponse, CouncilResponse } from "./council";
 import type { ThesisResponse } from "./thesis";
 
+export type DefenseRequest = {
+  defenseTime: string;
+  location: string;
+  thesisId: string;
+  councilId: string;
+};
+
 export type DefenseResponse = {
   id: string;
   defenseTime: string;

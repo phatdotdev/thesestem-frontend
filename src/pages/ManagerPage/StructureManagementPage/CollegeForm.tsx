@@ -5,6 +5,8 @@ import Modal from "../../../components/UI/Modal";
 import type { OrgUnit } from "../../../types/structure";
 import Textarea from "../../../components/UI/TextArea";
 import { useUpdateCollegeMutation } from "../../../services/orgApi";
+import { useAppDispatch } from "../../../app/hook";
+import { addToast } from "../../../features/notification/toastSlice";
 
 const CollegeForm = ({
   collegeId,
@@ -17,6 +19,7 @@ const CollegeForm = ({
   initialData: OrgUnit | null;
   onClose: () => void;
 }) => {
+  const dispatch = useAppDispatch();
   const [updateCollege] = useUpdateCollegeMutation();
   const [form, setForm] = useState({
     name: "",
@@ -38,25 +41,44 @@ const CollegeForm = ({
     }));
   };
   const onSubmit = async () => {
-    await updateCollege({ id: collegeId, data: form }).unwrap();
-    setForm({
-      name: "",
-      code: "",
-      description: "",
-    });
-    onClose();
+    if (!form.name.trim()) {
+      dispatch(
+        addToast({ type: "warning", message: "Vui lòng nhập tên trường" }),
+      );
+      return;
+    }
+
+    try {
+      await updateCollege({ id: collegeId, data: form }).unwrap();
+      setForm({
+        name: "",
+        code: "",
+        description: "",
+      });
+      onClose();
+      dispatch(
+        addToast({ type: "success", message: "Cập nhật trường thành công" }),
+      );
+    } catch (error) {
+      console.log(error);
+      dispatch(
+        addToast({ type: "error", message: "Không thể cập nhật trường" }),
+      );
+    }
   };
   return (
     <Modal open={open} onClose={onClose}>
-      <div className="space-y-3">
-        {/* HEADER */}
-        <div>
-          <h2 className="text-xl font-semibold">Cập nhật trường</h2>
-          <p className="text-sm text-gray-500">Nhập thông tin trường</p>
+      <div className="space-y-4">
+        <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-800/60">
+          <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
+            Cập nhật trường
+          </h2>
+          <p className="text-sm text-slate-600 dark:text-slate-300">
+            Chỉnh sửa thông tin đơn vị cấp Trường.
+          </p>
         </div>
 
-        {/* FORM */}
-        <div className="space-y-3">
+        <div className="space-y-3 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
           <Input
             name="name"
             label="Tên trường"
@@ -79,10 +101,9 @@ const CollegeForm = ({
           />
         </div>
 
-        {/* ACTIONS */}
-        <div className="flex justify-end gap-3">
-          <Button label="Hủy" variant="ghost" onClick={onClose} />
-          <Button label="Lưu thay đổi" onClick={onSubmit} />
+        <div className="flex justify-end gap-3 pt-1">
+          <Button label="Hủy" variant="ghost" size="sm" onClick={onClose} />
+          <Button label="Lưu thay đổi" size="sm" onClick={onSubmit} />
         </div>
       </div>
     </Modal>

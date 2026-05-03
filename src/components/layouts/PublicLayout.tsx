@@ -3,9 +3,9 @@ import Header from "../../components/header/Header";
 
 const PublicLayout = () => {
   return (
-    <div className="dark:bg-gray-950 dark:text-white min-h-screen">
+    <div className="dark:bg-gray-950 dark:text-white min-h-screen flex flex-col">
       <Header />
-      <div>
+      <div className="flex-1">
         <Outlet />
       </div>
     </div>

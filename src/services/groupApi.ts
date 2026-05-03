@@ -1,16 +1,21 @@
 import type {
   AssignmentResponse,
+  AssignmentSubmissionResponse,
   AssignStudentRequest,
   CreateAssignmentRequest,
   CreateGroupForm,
+  CreateMeetingRequest,
   CreateTopicRequest,
   DeleteAssignmentRequest,
+  DeleteMeetingRequest,
   DeleteTopicRequest,
   GroupResponse,
+  MeetingResponse,
   ThesesResponse,
   TopicResponse,
   UpdateAssignmentRequest,
   UpdateGroupForm,
+  UpdateMeetingRequest,
   UpdateTopicRequest,
 } from "../types/group";
 import type { ApiResponse } from "../types/response";
@@ -39,6 +44,7 @@ export const groupApi = api.injectEndpoints({
       query: () => ({
         url: `${GROUP_URL}/student/current`,
       }),
+      providesTags: ["Group"],
     }),
     getGroupById: builder.query<ApiResponse<GroupResponse>, string>({
       query: (id) => ({
@@ -77,6 +83,7 @@ export const groupApi = api.injectEndpoints({
       query: (id) => ({
         url: `${GROUP_URL}/${id}/assignments`,
       }),
+      providesTags: ["Assignment"],
     }),
     createAssignment: builder.mutation<
       ApiResponse<AssignmentResponse>,
@@ -87,6 +94,7 @@ export const groupApi = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Assignment"],
     }),
     updateAssignment: builder.mutation<
       ApiResponse<AssignmentResponse>,
@@ -97,6 +105,7 @@ export const groupApi = api.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Assignment", "AssignmentSubmission"],
     }),
     deleteAssignment: builder.mutation<
       ApiResponse<void>,
@@ -106,12 +115,125 @@ export const groupApi = api.injectEndpoints({
         url: `${GROUP_URL}/${groupId}/assignments/${assignmentId}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Assignment", "AssignmentSubmission"],
+    }),
+    getAssignmentDetail: builder.query<
+      ApiResponse<AssignmentResponse>,
+      { groupId: string; assignmentId: string }
+    >({
+      query: ({ groupId, assignmentId }) => ({
+        url: `${GROUP_URL}/${groupId}/assignments/${assignmentId}`,
+      }),
+      providesTags: ["Assignment"],
+    }),
+    submitAssignment: builder.mutation<
+      ApiResponse<void>,
+      { groupId: string; assignmentId: string; form: FormData }
+    >({
+      query: ({ groupId, assignmentId, form }) => ({
+        url: `${GROUP_URL}/${groupId}/assignments/${assignmentId}/submissions`,
+        method: "POST",
+        body: form,
+      }),
+      invalidatesTags: ["AssignmentSubmission", "Assignment"],
+    }),
+    getStudentAssignmentSubmissions: builder.query<
+      ApiResponse<AssignmentSubmissionResponse[]>,
+      { groupId: string; assignmentId: string }
+    >({
+      query: ({ groupId, assignmentId }) => ({
+        url: `${GROUP_URL}/${groupId}/assignments/${assignmentId}/submissions/student`,
+      }),
+      providesTags: ["AssignmentSubmission"],
+    }),
+    getAssignmentSubmissions: builder.query<
+      ApiResponse<AssignmentSubmissionResponse[]>,
+      { groupId: string; assignmentId: string }
+    >({
+      query: ({ groupId, assignmentId }) => ({
+        url: `${GROUP_URL}/${groupId}/assignments/${assignmentId}/submissions`,
+      }),
+      providesTags: ["AssignmentSubmission"],
+    }),
+    /* MEETINGS */
+    getGroupMeetings: builder.query<ApiResponse<MeetingResponse[]>, string>({
+      query: (id) => ({
+        url: `${GROUP_URL}/${id}/meetings`,
+      }),
+      providesTags: ["Meeting"],
+    }),
+    createMeeting: builder.mutation<
+      ApiResponse<MeetingResponse>,
+      CreateMeetingRequest
+    >({
+      query: ({ groupId, data }) => ({
+        url: `${GROUP_URL}/${groupId}/meetings`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Meeting"],
+    }),
+    updateMeeting: builder.mutation<
+      ApiResponse<MeetingResponse>,
+      UpdateMeetingRequest
+    >({
+      query: ({ groupId, meetingId, data }) => ({
+        url: `${GROUP_URL}/${groupId}/meetings/${meetingId}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Meeting"],
+    }),
+    deleteMeeting: builder.mutation<ApiResponse<void>, DeleteMeetingRequest>({
+      query: ({ groupId, meetingId }) => ({
+        url: `${GROUP_URL}/${groupId}/meetings/${meetingId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Meeting"],
+    }),
+    /* DOCUMENTS */
+    getGroupDocuments: builder.query<ApiResponse<any>, string>({
+      query: (id) => ({
+        url: `${GROUP_URL}/${id}/documents`,
+      }),
+      providesTags: ["Folder", "FileAsset"],
+    }),
+    uploadFileToGroup: builder.mutation<ApiResponse<void>, any>({
+      query: ({ groupId, folderId, formData }) => ({
+        url: `${GROUP_URL}/${groupId}/files/${folderId}`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: ["Folder", "FileAsset"],
+    }),
+    deleteFileFromGroup: builder.mutation<ApiResponse<void>, any>({
+      query: ({ groupId, folderId, fileId }) => ({
+        url: `${GROUP_URL}/${groupId}/files/${folderId}/${fileId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Folder", "FileAsset"],
+    }),
+    createGroupFolder: builder.mutation<ApiResponse<void>, any>({
+      query: ({ groupId, folderId, name }) => ({
+        url: `${GROUP_URL}/${groupId}/folders/${folderId}`,
+        method: "POST",
+        body: { name },
+      }),
+      invalidatesTags: ["Folder", "FileAsset"],
+    }),
+    deleteGroupFolder: builder.mutation<ApiResponse<void>, any>({
+      query: ({ groupId, folderId }) => ({
+        url: `${GROUP_URL}/${groupId}/folders/${folderId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Folder", "FileAsset"],
     }),
     /* TOPICS */
     getGroupTopics: builder.query<ApiResponse<TopicResponse[]>, string>({
       query: (id) => ({
         url: `${GROUP_URL}/${id}/topics`,
       }),
+      providesTags: ["Topic"],
     }),
     createTopic: builder.mutation<
       ApiResponse<TopicResponse>,
@@ -122,6 +244,7 @@ export const groupApi = api.injectEndpoints({
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Topic"],
     }),
     updateTopic: builder.mutation<
       ApiResponse<TopicResponse>,
@@ -132,12 +255,14 @@ export const groupApi = api.injectEndpoints({
         method: "PUT",
         body: data,
       }),
+      invalidatesTags: ["Topic"],
     }),
     deleteTopic: builder.mutation<ApiResponse<void>, DeleteTopicRequest>({
       query: ({ groupId, topicId }) => ({
         url: `${GROUP_URL}/${groupId}/topics/${topicId}`,
         method: "DELETE",
       }),
+      invalidatesTags: ["Topic"],
     }),
     assignStudentToTopic: builder.mutation<
       ApiResponse<void>,
@@ -147,6 +272,22 @@ export const groupApi = api.injectEndpoints({
         url: `${GROUP_URL}/${groupId}/topics/${topicId}/${studentId}`,
         method: "POST",
       }),
+      invalidatesTags: ["Topic", "GroupStudent", "Thesis"],
+    }),
+    exchangeStudentBetweenTopics: builder.mutation<
+      ApiResponse<void>,
+      {
+        groupId: string;
+        studentId: string;
+        oldTopicId: string;
+        newTopicId: string;
+      }
+    >({
+      query: ({ groupId, studentId, newTopicId }) => ({
+        url: `${GROUP_URL}/${groupId}/topics/${newTopicId}/${studentId}/exchange`,
+        method: "POST",
+      }),
+      invalidatesTags: ["Topic", "GroupStudent", "Thesis"],
     }),
     /* STUDENTS */
     getStudentsInGroup: builder.query<ApiResponse<StudentResponse[]>, string>({
@@ -163,7 +304,7 @@ export const groupApi = api.injectEndpoints({
         url: `${GROUP_URL}/${groupId}/students/${studentId}`,
         method: "PUT",
       }),
-      invalidatesTags: ["Group", "SemesterStudent"],
+      invalidatesTags: ["Group", "SemesterStudent", "GroupStudent"],
     }),
     removeStudentFromGroup: builder.mutation<
       ApiResponse<void>,
@@ -173,13 +314,14 @@ export const groupApi = api.injectEndpoints({
         url: `${GROUP_URL}/${groupId}/students/${studentId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Group", "SemesterStudent"],
+      invalidatesTags: ["Group", "SemesterStudent", "GroupStudent"],
     }),
     /* THESES */
     getGroupTheses: builder.query<ApiResponse<ThesesResponse[]>, string>({
       query: (id) => ({
         url: `${GROUP_URL}/${id}/theses`,
       }),
+      providesTags: ["Thesis"],
     }),
   }),
 });
@@ -199,12 +341,28 @@ export const {
   useCreateAssignmentMutation,
   useUpdateAssignmentMutation,
   useDeleteAssignmentMutation,
+  useGetAssignmentDetailQuery,
+  useSubmitAssignmentMutation,
+  useGetStudentAssignmentSubmissionsQuery,
+  useGetAssignmentSubmissionsQuery,
+  /* MEETINGS */
+  useGetGroupMeetingsQuery,
+  useCreateMeetingMutation,
+  useUpdateMeetingMutation,
+  useDeleteMeetingMutation,
+  /* DOCUMENTS */
+  useGetGroupDocumentsQuery,
+  useUploadFileToGroupMutation,
+  useDeleteFileFromGroupMutation,
+  useCreateGroupFolderMutation,
+  useDeleteGroupFolderMutation,
   /* TOPICS */
   useGetGroupTopicsQuery,
   useCreateTopicMutation,
   useUpdateTopicMutation,
   useDeleteTopicMutation,
   useAssignStudentToTopicMutation,
+  useExchangeStudentBetweenTopicsMutation,
   /* STUDENTS */
   useGetStudentsInGroupQuery,
   useAssignStudentToGroupMutation,

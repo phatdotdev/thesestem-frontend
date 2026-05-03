@@ -35,7 +35,7 @@ const StudentRow = ({ student, onEdit, onDelete }: Props) => {
             {student.fullName}
           </span>
 
-          <span className="text-xs text-gray-500">{student.program.name}</span>
+          <span className="text-xs text-gray-500">{student.email}</span>
         </div>
       </div>
 

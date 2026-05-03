@@ -32,6 +32,25 @@
   font-style: normal;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  background-color: #ffffff;
+  color: #111827;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+html.dark body {
+  background-color: #030712;
+  color: #f3f4f6;
+}
+
 header {
   font-family: "Inter", sans-serif;
 }

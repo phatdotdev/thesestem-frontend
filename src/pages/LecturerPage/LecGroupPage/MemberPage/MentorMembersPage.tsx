@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   useGetGroupThesesQuery,
@@ -10,6 +10,12 @@ import { FaSearch } from "react-icons/fa";
 import MemberCard from "./MemberCard";
 import TopicListModal from "./TopicListModal";
 import type { StudentResponse } from "../../../../types/student";
+import { Plus, Users } from "lucide-react";
+import EmptyState from "../../../../components/UI/EmptyState";
+import Button from "../../../../components/UI/Button";
+import RegisterModal from "./RegisterModal";
+import type { ThesisResponse } from "../../../../types/thesis";
+import type { ThesesResponse } from "../../../../types/group";
 
 const MentorMembersPage = () => {
   const { ["group-id"]: groupId } = useParams();
@@ -20,11 +26,18 @@ const MentorMembersPage = () => {
   const members = membersResponse?.data || [];
   const theses = thesesResposne?.data || [];
 
-  console.log(theses);
+  const topicByStudentId = new Map(
+    theses.map((thesis) => [thesis.student.id, thesis.title]),
+  );
 
   const [openTopicModal, setOpenTopicModal] = useState(false);
+  const [openRegisterModal, setOpenRegisterModal] = useState(false);
   const [selectedStudent, setSelectedStudent] =
     useState<null | StudentResponse>(null);
+
+  const [thesisByStudent, setThesisByStudent] = useState<null | ThesesResponse>(
+    null,
+  );
 
   // filter theo tên hoặc MSSV
   const filteredMembers = members.filter((student) => {
@@ -34,54 +47,80 @@ const MentorMembersPage = () => {
       student.studentCode.toLowerCase().includes(keyword)
     );
   });
+  const thesisMap = useMemo(() => {
+    return new Map<string, ThesesResponse>(
+      theses.map((t) => [t.student.id, t]),
+    );
+  }, [theses]);
 
   return (
-    <div className="bg-white border border-gray-200 shadow rounded-2xl p-6">
+    <div className="mt-6 rounded-3xl border border-gray-200/80 bg-white/95 p-6 shadow-sm dark:border-gray-700 dark:bg-gray-900/95">
       {/* HEADER */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Quản lý thành viên</h1>
-        <p className="text-gray-500">
-          Danh sách sinh viên thuộc nhóm hướng dẫn
-        </p>
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex gap-3 items-center">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-gray-200 bg-gray-100 text-gray-600 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+            <Users size={24} />
+          </div>
+          <div className="space-y-1">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Quản lý thành viên
+            </h1>
+
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              Danh sách sinh viên trong nhóm hướng dẫn
+            </p>
+          </div>
+        </div>
+
+        {/* SEARCH */}
+        <div className="flex items-center gap-4 relative mb-6">
+          <Input
+            iconLeft={FaSearch}
+            type="text"
+            placeholder="Tìm theo tên hoặc MSSV..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+          <div className="w-60">
+            <Button
+              onClick={() => setOpenRegisterModal(true)}
+              icon={Plus}
+              label="Thêm sinh viên"
+              size="sm"
+            />
+          </div>
+        </div>
       </div>
 
-      {/* SEARCH */}
-      <div className="relative w-full md:w-72 mb-6">
-        <Input
-          iconLeft={FaSearch}
-          type="text"
-          placeholder="Tìm theo tên hoặc MSSV..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-      <p className="text-lg font-semibold text-gray-700 mb-4 flex items-center">
+      <p className="mt-4 mb-4 flex items-center text-lg font-semibold text-gray-800 dark:text-gray-100">
         Danh sách sinh viên
       </p>
 
       {/* MEMBER LIST */}
       <div className="grid gap-4">
         {filteredMembers.length === 0 ? (
-          <div className="text-center text-gray-400 py-10">
-            Không có sinh viên nào phù hợp
-          </div>
+          <EmptyState
+            icon={Users}
+            title="Chưa có sinh viên"
+            description="Thêm sinh viên mới để bắt đầu hướng dẫn."
+          />
         ) : (
           filteredMembers.map((member) => (
             <MemberCard
               key={member.id}
               member={member}
               topic={
-                theses.find((thesis) => thesis.student.id === member.id)
-                  ? {
-                      title: theses.find(
-                        (thesis) => thesis.student.id === member.id,
-                      )!.title,
-                    }
+                topicByStudentId.get(member.id)
+                  ? { title: topicByStudentId.get(member.id)! }
                   : undefined
               }
               onSelect={() => {
                 {
                   setSelectedStudent(member);
+                  const studentThesis = theses.find(
+                    (t) => t.student.id === member.id,
+                  );
+                  setThesisByStudent(studentThesis || null);
                   setOpenTopicModal(true);
                 }
               }}
@@ -95,6 +134,12 @@ const MentorMembersPage = () => {
         open={openTopicModal}
         onClose={() => setOpenTopicModal(false)}
         student={selectedStudent}
+        topic={thesisByStudent}
+      />
+      <RegisterModal
+        open={openRegisterModal}
+        onClose={() => setOpenRegisterModal(false)}
+        groupId={groupId as string}
       />
     </div>
   );

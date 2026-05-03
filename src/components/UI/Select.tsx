@@ -1,6 +1,6 @@
 import * as React from "react";
 import clsx from "clsx";
-import { type LucideIcon } from "lucide-react";
+import { type LucideIcon, ChevronDown } from "lucide-react";
 
 type SelectVariant = "default" | "outline" | "filled" | "ghost";
 type SelectSize = "xs" | "sm" | "md" | "lg";
@@ -28,11 +28,14 @@ const baseWrapper =
 
 const variantWrapper: Record<SelectVariant, string> = {
   default:
-    "border border-gray-300 bg-white focus-within:border-blue-500 focus-within:ring-blue-500 dark:border-gray-700 dark:bg-gray-900",
+    "border border-gray-300 bg-white hover:border-gray-400 focus-within:border-blue-500 focus-within:ring-blue-500 dark:border-gray-700 dark:bg-gray-900 dark:hover:border-gray-500",
+
   outline:
     "border-2 border-gray-300 bg-white focus-within:border-blue-600 focus-within:ring-blue-500 dark:border-gray-600 dark:bg-gray-900",
+
   filled:
     "border border-transparent bg-gray-100 focus-within:bg-white focus-within:border-blue-500 focus-within:ring-blue-500 dark:bg-gray-800 dark:focus-within:bg-gray-900",
+
   ghost:
     "border border-transparent bg-transparent hover:bg-gray-100 focus-within:bg-white focus-within:ring-blue-500 dark:hover:bg-gray-800 dark:focus-within:bg-gray-900",
 };
@@ -69,6 +72,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       size = "md",
       className,
       containerClassName,
+      disabled,
       ...props
     },
     ref,
@@ -77,7 +81,7 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
 
     return (
       <div className={clsx("w-full space-y-1", containerClassName)}>
-        {/* Label */}
+        {/* LABEL */}
         {label && (
           <label
             className={clsx(
@@ -92,51 +96,69 @@ const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           </label>
         )}
 
-        {/* Wrapper */}
+        {/* WRAPPER */}
         <div
           className={clsx(
             baseWrapper,
             variantWrapper[variant],
+            disabled &&
+              "opacity-60 cursor-not-allowed bg-gray-100 dark:bg-gray-800",
             isError &&
               "border-red-500 focus-within:border-red-500 focus-within:ring-red-500",
           )}
         >
-          {/* Left icon */}
+          {/* LEFT ICON */}
           {IconLeft && (
             <span className="px-3 text-gray-400 dark:text-gray-500">
               <IconLeft size={iconSize[size]} />
             </span>
           )}
 
-          {/* Select */}
+          {/* SELECT */}
           <select
             ref={ref}
+            disabled={disabled}
             className={clsx(
               "w-full appearance-none bg-transparent",
               sizePadding[size],
               sizeWrapper[size],
               "text-gray-900 dark:text-gray-100",
               "focus:outline-none",
-              !IconLeft && "pl-2",
-              "pr-2",
+              "disabled:cursor-not-allowed",
+              !IconLeft && "pl-3",
+              "pr-8",
               className,
             )}
             {...props}
           >
             {options.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+              <option
+                key={opt.value}
+                value={opt.value}
+                className="bg-white text-gray-900 dark:bg-gray-900 dark:text-gray-100"
+              >
                 {opt.label}
               </option>
             ))}
           </select>
+
+          {/* ARROW */}
+          <div className="absolute right-2 pointer-events-none text-gray-400 dark:text-gray-500">
+            <ChevronDown size={16} />
+          </div>
         </div>
 
-        {/* Error */}
-        {error && <p className="text-xs font-medium text-red-500">{error}</p>}
+        {/* ERROR */}
+        {error && (
+          <p className="text-xs font-medium text-red-500 dark:text-red-400">
+            {error}
+          </p>
+        )}
       </div>
     );
   },
 );
 
 Select.displayName = "Select";
+
 export default Select;

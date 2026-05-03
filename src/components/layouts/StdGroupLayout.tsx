@@ -3,7 +3,7 @@ import StdTopbar from "../../pages/StudentPage/StudentGroupPage/StdTopbar";
 
 const StdGroupLayout = () => {
   return (
-    <div>
+    <div className="space-y-4 sm:space-y-6">
       <StdTopbar />
       <Outlet />
     </div>

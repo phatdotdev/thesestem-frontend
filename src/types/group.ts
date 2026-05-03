@@ -28,6 +28,19 @@ export type AssignmentResponse = {
   status: AssignmentStatus;
 };
 
+export type AssignmentSubmissionFile = {
+  id: string;
+  name: string;
+  url?: string;
+};
+
+export type AssignmentSubmissionResponse = {
+  id: string;
+  student: StudentResponse;
+  submittedAt: string;
+  files: AssignmentSubmissionFile[];
+};
+
 export type CreateAssignmentRequest = {
   groupId: string;
   data: { name: string; description: string; deadline: string };
@@ -44,9 +57,40 @@ export type DeleteAssignmentRequest = {
   assignmentId: string;
 };
 
+export type MeetingResponse = {
+  id: string;
+  title: string;
+  description: string;
+  startAt: string;
+  endAt: string;
+  url: string;
+};
+
+export type CreateMeetingRequest = {
+  groupId: string;
+  data: {
+    title: string;
+    description: string;
+    startAt: string;
+    endAt: string;
+  };
+};
+
+export type UpdateMeetingRequest = {
+  groupId: string;
+  meetingId: string;
+  data: { title: string; description: string; startAt: string; endAt: string };
+};
+
+export type DeleteMeetingRequest = {
+  groupId: string;
+  meetingId: string;
+};
+
 export type TopicStatus = "DRAFT" | "OPEN" | "IN_PROGRESS" | "COMPLETED";
 
 export type TopicResponse = {
+  currentStudents: number;
   id: string;
   title: string;
   description: string;

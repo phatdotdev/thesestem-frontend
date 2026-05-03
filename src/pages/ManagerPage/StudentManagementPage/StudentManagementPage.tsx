@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaFileExcel, FaSearch } from "react-icons/fa";
 import { GrPowerReset } from "react-icons/gr";
-import { Plus, User, Users, UserSearch } from "lucide-react";
+import { Plus, Search, User } from "lucide-react";
 
 import Button from "../../../components/UI/Button";
 import Input from "../../../components/UI/Input";
@@ -16,9 +16,14 @@ import StudentRow from "./StudentRow";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
 
 import type { StudentResponse } from "../../../types/student";
+import { useGetProgramsQuery } from "../../../services/orgApi";
+import { useGetCoursesQuery } from "../../../services/catApi";
 
 const StudentManagementPage = () => {
   const size = 5;
+
+  const { data: programsData } = useGetProgramsQuery({});
+  const { data: coursesData } = useGetCoursesQuery();
 
   const [form, setForm] = useState({
     name: "",
@@ -122,13 +127,15 @@ const StudentManagementPage = () => {
       </div>
 
       {/* Search */}
-      <div className="rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 p-4">
-        <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200 mb-2">
-          <UserSearch size={22} />
-          <p className="text-lg font-semibold">Tìm kiếm sinh viên</p>
+      <div className="rounded-xl border border-gray-200 dark:border-gray-700/60 bg-gray-50 dark:bg-gray-800/50 overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700/60 text-gray-700 dark:text-gray-300">
+          <Search size={16} />
+          <p className="text-xs font-semibold uppercase tracking-wider">
+            Tìm kiếm sinh viên
+          </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-x-4 gap-y-2 lg:grid-cols-4 mb-2">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-5 p-4 items-end">
           <Input
             label="Mã sinh viên"
             size="sm"
@@ -145,7 +152,13 @@ const StudentManagementPage = () => {
 
           <Select
             label="Chương trình"
-            options={[{ label: "Chọn chương trình", value: "" }]}
+            options={[
+              { label: "Chọn chương trình", value: "" },
+              ...(programsData?.data.map((program) => ({
+                label: program.name,
+                value: program.id,
+              })) || []),
+            ]}
             size="sm"
             value={tempForm.programId}
             onChange={(e) => handleChange("programId", e.target.value)}
@@ -153,35 +166,40 @@ const StudentManagementPage = () => {
 
           <Select
             label="Khóa"
-            options={[{ label: "Chọn khóa", value: "" }]}
+            options={[
+              { label: "Chọn khóa", value: "" },
+              ...(coursesData?.data.map((course) => ({
+                label: course.name,
+                value: course.id,
+              })) || []),
+            ]}
             size="sm"
             value={tempForm.courseId}
             onChange={(e) => handleChange("courseId", e.target.value)}
           />
-        </div>
 
-        <div className="flex justify-end gap-3 pt-2">
-          <Button
-            icon={GrPowerReset}
-            label="Xóa lọc"
-            size="sm"
-            variant="ghost"
-            className="border border-gray-300 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
-            onClick={handleReset}
-          />
+          <div className="flex justify-end gap-3">
+            <Button
+              icon={GrPowerReset}
+              label="Xóa lọc"
+              size="sm"
+              variant="ghost"
+              className="border border-gray-300 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-700"
+              onClick={handleReset}
+            />
 
-          <Button
-            icon={FaSearch}
-            label="Tìm kiếm"
-            size="sm"
-            onClick={handleSearch}
-          />
+            <Button
+              icon={FaSearch}
+              label="Tìm kiếm"
+              size="sm"
+              onClick={handleSearch}
+            />
+          </div>
         </div>
       </div>
 
       {/* Title */}
       <div className="flex items-center gap-2 text-gray-800 dark:text-gray-200 mb-2 px-2">
-        <Users size={20} />
         <p className="text-lg font-semibold">Danh sách sinh viên</p>
       </div>
 
@@ -279,12 +297,7 @@ const StudentManagementPage = () => {
         student={student}
       />
 
-      {openExcel && (
-        <ExcelImportModal
-          onImport={() => {}}
-          onClose={() => setOpenExcel(false)}
-        />
-      )}
+      <ExcelImportModal open={openExcel} onClose={() => setOpenExcel(false)} />
     </div>
   );
 };

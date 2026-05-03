@@ -2,6 +2,7 @@ import { Plus, Trash, User } from "lucide-react";
 import Button from "../../../components/UI/Button";
 import type { StudentResponse } from "../../../types/student";
 import Badge from "../../../components/UI/Badge";
+import { formatGender } from "../../../utils/formatters";
 
 interface Props {
   student: StudentResponse;
@@ -17,50 +18,54 @@ const StudentRow = ({ student, onAdd, onDelete, added }: Props) => {
       grid grid-cols-9 gap-4
       px-4 py-3
       text-sm
-      border-b border-gray-200
-      hover:bg-gray-50
+      border-b border-gray-200 dark:border-gray-700
+      hover:bg-gray-50 dark:hover:bg-gray-800
       transition
     "
     >
       {/* Sinh viên */}
       <div className="col-span-2 flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 text-blue-600">
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
           <User size={16} />
         </div>
 
         <div className="flex flex-col">
-          <span className="font-medium text-gray-900">{student.fullName}</span>
-          <span className="text-xs text-gray-500">{student.email}</span>
+          <span className="font-medium text-gray-900 dark:text-gray-100">
+            {student.fullName}
+          </span>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {student.email}
+          </span>
         </div>
       </div>
 
       {/* Mã SV */}
-      <div className="flex items-center text-gray-700 font-medium">
+      <div className="flex items-center text-gray-700 dark:text-gray-300 font-medium">
         {student.studentCode}
       </div>
 
       {/* DOB */}
-      <div className="flex items-center text-gray-600">
+      <div className="flex items-center text-gray-600 dark:text-gray-400">
         {student.dob || "-"}
       </div>
 
       {/* Gender */}
-      <div className="flex items-center text-gray-600">
-        {student.gender || "-"}
+      <div className="flex items-center text-gray-600 dark:text-gray-400">
+        {formatGender(student.gender) || "-"}
       </div>
 
       {/* Phone */}
-      <div className="flex items-center text-gray-600">
+      <div className="flex items-center text-gray-600 dark:text-gray-400">
         {student.phone || "-"}
       </div>
 
       {/* Program */}
-      <div className="flex items-center truncate">
+      <div className="flex items-center truncate text-gray-700 dark:text-gray-300">
         {student.program?.name || "-"}
       </div>
 
       {/* Course */}
-      <div className="flex items-center truncate">
+      <div className="flex items-center truncate text-gray-700 dark:text-gray-300">
         {student.course?.name || "-"}
       </div>
 
@@ -71,7 +76,7 @@ const StudentRow = ({ student, onAdd, onDelete, added }: Props) => {
             icon={Plus}
             variant="outline"
             size="sm"
-            className="hover:bg-green-50 hover:border-green-300"
+            className="hover:bg-green-50 dark:hover:bg-green-900 hover:border-green-300 dark:border-green-700"
             onClick={onAdd}
           />
         )}
@@ -81,7 +86,7 @@ const StudentRow = ({ student, onAdd, onDelete, added }: Props) => {
             icon={Trash}
             variant="outline"
             size="sm"
-            className="hover:bg-red-50 hover:border-red-300"
+            className="hover:bg-red-50 dark:hover:bg-red-900 hover:border-red-300 dark:border-red-700"
             onClick={onDelete}
           />
         )}
